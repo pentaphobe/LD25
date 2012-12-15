@@ -3,7 +3,7 @@ package com.mutantamoeba.ld25;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.mutantamoeba.ld25.engine.Console;
-import com.mutantamoeba.ld25.screens.GameScreen;
+import com.mutantamoeba.ld25.screens.TileTestScreen;
 
 public class LD25 extends Game {
 	public static final boolean DEBUG_MODE = true;
@@ -20,7 +20,7 @@ public class LD25 extends Game {
 //		} else {
 //			setScreen(new SplashScreen(this));		
 //		}	
-		setScreen(new GameScreen(this));
+		setScreen(new TileTestScreen(this));
 	}
 	
 	@Override
