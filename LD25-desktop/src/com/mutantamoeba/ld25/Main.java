@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
 
@@ -9,8 +10,7 @@ public class Main {
 		cfg.title = "LD25";
 		cfg.useGL20 = true;
 		cfg.width = 480;
-		cfg.height = 320;		
-		
+		cfg.height = 320;				
 		new LwjglApplication(new LD25(), cfg);
 	}
 }

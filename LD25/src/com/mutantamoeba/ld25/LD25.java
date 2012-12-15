@@ -12,6 +12,7 @@ public class LD25 extends Game {
 			
 	@Override
 	public void create() {	
+		Gdx.app.setLogLevel(Gdx.app.LOG_DEBUG);
 		Console.debug("create");
 //		if (DEBUG_MODE) {
 			// skip the splash screen if we're in debug mode

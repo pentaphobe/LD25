@@ -14,7 +14,7 @@ public class Console {
 	}
 	public static void debug(String fmt, Object... args) {
 		if (LD25.DEBUG_MODE) { 
-			Gdx.app.debug(LD25.LOG, String.format(fmt, args));
+			Gdx.app.debug(LD25.LOG, String.format(fmt, args));			
 		}
 	}
 }
