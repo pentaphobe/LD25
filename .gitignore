@@ -1,0 +1,15 @@
+*.class
+.DS_Store
+
+# Package Files #
+*.jar
+*.war
+*.ear
+
+# folders
+LD25/bin/*
+LD25/libs/*
+LD25-android/bin/*
+LD25-android/libs/*
+LD25-desktop/bin/*
+LD25-desktop/libs/*
