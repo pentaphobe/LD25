@@ -10,7 +10,9 @@ public class Main {
 		cfg.title = "LD25";
 		cfg.useGL20 = true;
 		cfg.width = 480;
-		cfg.height = 320;				
+		cfg.height = 320;		
+//		cfg.vSyncEnabled = true;
+//		cfg.useCPUSynch = true;
 		new LwjglApplication(new LD25(), cfg);
 	}
 }

@@ -2,6 +2,7 @@ package com.mutantamoeba.ld25.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -98,6 +99,9 @@ public abstract class BasicScreen extends AbstractScreen {
 	 */
 	@Override
 	public boolean keyUp(int keycode) {
+		if (keycode == Input.Keys.F11) {
+			toggleFullscreen();
+		}
 		return stage.keyUp(keycode);
 	}
 

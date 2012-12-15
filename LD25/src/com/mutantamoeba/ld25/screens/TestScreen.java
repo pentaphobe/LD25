@@ -95,7 +95,7 @@ public class TestScreen extends BasicScreen {
 		Console.debug("hit actor (%s) at %d,%d", hit, x, y);
 		return true;
 	}
-
+	
 	/* (non-Javadoc)
 	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#scrolled(int)
 	 */
