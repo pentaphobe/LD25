@@ -12,6 +12,8 @@ import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.GL11;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.Texture.TextureFilter;
+import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.SpriteCache;
@@ -19,8 +21,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.InputEvent.Type;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.mutantamoeba.ld25.engine.Console;
 
 /** The main game screen
@@ -48,7 +51,33 @@ public class TileTestScreen extends BasicScreen {
 			super();
 			this.tileSize = 32;
 			setSize(w * this.tileSize, h * this.tileSize);
+			addListener(new DragListener() {
 
+				/* (non-Javadoc)
+				 * @see com.badlogic.gdx.scenes.scene2d.utils.DragListener#drag(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int)
+				 */
+				@Override
+				public void drag(InputEvent event, float x, float y, int pointer) {
+					beginEdit();
+					setTile(x, y, 0, 32);
+					endEdit();
+					super.drag(event, x, y, pointer);
+				}				
+			});
+			addListener(new ClickListener() {
+
+				/* (non-Javadoc)
+				 * @see com.badlogic.gdx.scenes.scene2d.utils.ClickListener#clicked(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float)
+				 */
+				@Override
+				public void clicked(InputEvent event, float x, float y) {
+					beginEdit();
+					setTile(x, y, 0, 32);
+					endEdit();
+					super.clicked(event, x, y);
+				}
+				
+			});
 			this.w = w;
 			this.h = h;
 			this.area = this.w * this.h;
@@ -120,42 +149,32 @@ public class TileTestScreen extends BasicScreen {
 			cacheID = cache.endCache();
 			
 		}
-		/* (non-Javadoc)
-		 * @see com.badlogic.gdx.scenes.scene2d.Actor#notify(com.badlogic.gdx.scenes.scene2d.Event, boolean)
-		 */
-		@Override
-		public boolean fire(Event event) {
-			if (!(event instanceof InputEvent)) {
-				return false;
-			}
-			InputEvent inputEvent = (InputEvent)event;
-			if (inputEvent.getType() == Type.touchDown
-					|| inputEvent.getType() == Type.touchDragged) {				
-				Vector2 pos = new Vector2(inputEvent.getStageX(), inputEvent.getStageY());
-				pos = this.stageToLocalCoordinates(pos);
-				pos.div(tileSize);
-				int tx = (int)pos.x;
-				int ty = (int)pos.y;
-				beginEdit();
-				theMap[ty * w + tx][1] = 4;
-				endEdit();
-				Console.debug("set %d, %d to 0", tx, ty);
-			}
-			
-			return super.fire(event);
+		public void setTile(int x, int y, int layer, int tileIndex) {
+			if (x < 0 || y < 0 || x >= w || y >= h) return;
+			theMap[y * w + x][layer] = tileIndex;
 		}
-		
-		 
+		public void setTile(float x, float y, int layer, int tileIndex) {
+			Vector2 pos = new Vector2(x, y);
+			pos = this.stageToLocalCoordinates(pos);
+			pos.div(tileSize);
+			Console.debug("Setting %f, %f [layer:%d] to %d", pos.x, pos.y, layer, tileIndex);
+
+			setTile((int)pos.x, (int)pos.y, layer, tileIndex);
+		}
 	}
 	public TileTestScreen(Game game) {
 		super(game);
 		
+//		texture = new Texture("data/tileTest.png");
 		texture = new Texture("data/tileTest.png");
-		tileMap = new SimpleTileMap(64, 64, texture);
+		texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
+		texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
+				 	
+		tileMap = new SimpleTileMap(16, 32, texture);
 		int wallTiles[] = new int[] { 0, 1, 2, 8, 9, 10, 16, 17, 18 };
 		tileMap.beginEdit();
 		for (int i=0;i<tileMap.area;i++) {
-			tileMap.theMap[i][0] = 4;
+			tileMap.theMap[i][0] = 33;
 			if (rand.nextInt(100) < 10) {
 				int tx = i % tileMap.textureTileWidth;
 				int ty = i / tileMap.textureTileWidth;
@@ -167,6 +186,7 @@ public class TileTestScreen extends BasicScreen {
 		tileMap.endEdit();
 		stage.addActor(tileMap);
 		uiStage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		uiStage.getSpriteBatch().getTransformMatrix().scale(1, -1, 1);
 		Actor fpsCounter = new Actor() {
 			int lastFPS;
 			/* (non-Javadoc)
@@ -179,7 +199,7 @@ public class TileTestScreen extends BasicScreen {
 				
 				fnt.draw(batch, 
 						String.format("FPS:%d", Gdx.graphics.getFramesPerSecond()), getX(), getY());
-				
+				this.setSize(30, 10);
 			}
 
 			/* (non-Javadoc)
@@ -190,9 +210,24 @@ public class TileTestScreen extends BasicScreen {
 				// TODO Auto-generated method stub
 				super.act(delta);
 			}
+
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.Actor#fire(com.badlogic.gdx.scenes.scene2d.Event)
+			 */
+			@Override
+			public boolean fire(Event event) {
+				Console.debug("FPSCounter");
+				if (event instanceof InputEvent && ((InputEvent)event).getType() == InputEvent.Type.touchDown) {
+					Console.debug("FPS counter:%s", event);
+				}
+				return super.fire(event);
+			}
+			
+			
 		};
 		fpsCounter.setPosition(10, 20);
 		uiStage.addActor(fpsCounter);
+
 	}
 	/* (non-Javadoc)
 	 * @see com.mutantamoeba.ld25.screens.BasicScreen#render(float)
@@ -283,6 +318,6 @@ public class TileTestScreen extends BasicScreen {
 	public boolean touchDragged(int x, int y, int pointer) {
 		Console.debug("dragged");
 		uiStage.touchDragged(x, y, pointer);
-		return super.touchDragged(x, y, pointer);
+		return stage.touchDragged(x, y, pointer);
 	}	
 }

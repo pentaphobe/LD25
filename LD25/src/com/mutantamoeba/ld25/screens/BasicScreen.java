@@ -14,6 +14,7 @@ public abstract class BasicScreen extends AbstractScreen {
 	public BasicScreen(Game game) {
 		super(game);
 		stage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		stage.getSpriteBatch().getProjectionMatrix().scl(1, -1, 1);
 		Gdx.input.setInputProcessor(this);
 		
 	}
@@ -137,7 +138,7 @@ public abstract class BasicScreen extends AbstractScreen {
 	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDragged(int, int, int)
 	 */
 	@Override
-	public boolean touchDragged(int x, int y, int pointer) {
+	public boolean touchDragged(int x, int y, int pointer) {		
 		return stage.touchDragged(x, y, pointer);
 	}
 
