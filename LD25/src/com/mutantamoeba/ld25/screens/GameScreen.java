@@ -8,7 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -19,7 +19,7 @@ import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
-import com.mutantamoeba.ld25.engine.Console;
+import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.tilemap.GameTileset;
 import com.mutantamoeba.ld25.tilemap.TileRenderer;
 import com.mutantamoeba.ld25.tilemap.TileSubset;
@@ -31,7 +31,7 @@ public class GameScreen extends BasicScreen {
 	static final float SCROLL_SPEED = 200f; // pixels per second
 	static final float SCROLL_FAST_MULTIPLIER = 3f; // how much faster than SCROLL_SPEED do we go in fast mode?
 	
-	Texture texture;
+	public Texture texture;
 	boolean showFPS = true;
 	Stage uiStage;
 	GameWorld world;
@@ -72,13 +72,18 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void clicked(InputEvent event, float x, float y) {				
-				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
-				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
+				float rx = x / (TILE_SIZE * GameWorld.ROOM_SIZE);
+				float ry = y / (TILE_SIZE * GameWorld.ROOM_SIZE);
 //				Console.debug("roomRenderer touched at %f, %f", x, y);
 
 //				world.roomMap.makeBlankRoom((int)x, (int)y);
-				world.roomMap.makeTemplatedRoom((int)x, (int)y);				
-				tileRenderer.updateFromMap();
+				if (world.roomMap.get((int)rx, (int)ry) == null) {
+					world.roomMap.makeTemplatedRoom((int)rx, (int)ry);				
+					tileRenderer.updateFromMap();
+				} else {
+					spawnActor(x, y);
+				}
+				
 				super.clicked(event, x, y);
 			}			
 		});
@@ -100,25 +105,25 @@ public class GameScreen extends BasicScreen {
 		});
 		stage.addActor(roomRenderer);
 		
-		this.entities = new EntityGroup();
+		this.entities = new EntityGroup(world);
+//		this.entities.set
+		
 		stage.addActor(this.entities);
-		this.entities.addActor(new Actor() {
-
-			/* (non-Javadoc)
-			 * @see com.badlogic.gdx.scenes.scene2d.Actor#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch, float)
-			 */
-			@Override
-			public void draw(SpriteBatch batch, float parentAlpha) {
-				batch.draw(texture, getX(), getY(), 64, 64, 16, 16, 32, 32, false, false);
-//				super.draw(batch, parentAlpha);
-			}
-			
-		});
+		spawnActor(100, 100);
 
 		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
 		cam.translate(stage.getWidth() / 2, stage.getHeight() / 2);
+		
 	}
-
+	public void spawnActor(float x, float y) {
+		// [@temp just adds an entity for now]
+		TextureRegion region = new TextureRegion(texture, 0, 0, 32, 32);
+		Actor actor = new GameEntity(region);	
+		actor.setBounds(x, y, 32, 32);
+		actor.setOrigin(16, 16);
+		entities.addActor(actor);		
+	}
+	
 	/* (non-Javadoc)
 	 * @see com.mutantamoeba.ld25.screens.BasicScreen#render(float)
 	 */
@@ -128,7 +133,7 @@ public class GameScreen extends BasicScreen {
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		
 		update(delta);
-		
+				
 		stage.draw();			
 		uiStage.draw();		
 	}

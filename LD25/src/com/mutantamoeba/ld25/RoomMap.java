@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25;
 
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.Tile;
 import com.mutantamoeba.ld25.utils.ParameterMap;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
@@ -86,8 +87,8 @@ public class RoomMap extends ParameterMap<Room> {
 		if (r != null) {
 			return r;
 		}
-		r = new Room();
-		set(x, y, r);
+		r = new Room(x, y);
+		super.set(x, y, r);
 		int floorId = this.world.gameScreen.gameTiles.getId("floor");
 		int wallId = this.world.gameScreen.gameTiles.getId("wall");
 		int wallIndices[] = this.world.gameScreen.gameTiles.getTileIndices(wallId);
@@ -100,7 +101,7 @@ public class RoomMap extends ParameterMap<Room> {
 			
 			for (int xx = 0; xx < GameWorld.ROOM_SIZE; xx++, offs++) {
 				Tile tile = new Tile();
-				tile.layers[0] = this.world.gameScreen.gameTiles.getTileIndex(xx, yy, floorId);
+				tile.layers[Tile.FLOOR_LAYER] = this.world.gameScreen.gameTiles.getTileIndex(xx, yy, floorId);
 				boolean left = xx == 0;
 				boolean right = xx == GameWorld.ROOM_SIZE-1;
 				if (left || right || top || bottom) {
@@ -128,14 +129,67 @@ public class RoomMap extends ParameterMap<Room> {
 						index = 7;
 					}
 //					Console.debug("creating wall tileIndex:%d %s %s %s %s", index, left ? "left":"", right ? "right":"", top ? "top":"", bottom ? "bottom":"");
-					tile.layers[1] = wallIndices[index];
+					tile.layers[Tile.WALL_LAYER] = wallIndices[index];
 				}
 				if (objects != null && objects[offs] != -1) {
-					tile.layers[2] = objects[offs];
+					tile.layers[Tile.HAZARD_LAYER] = objects[offs];
 				}
 				world.tileMap.set(tileX + xx, tileY + yy, tile);
 			}
 		}
+		updateDoors(x, y);
 		return r;
+	}
+	/* (non-Javadoc)
+	 * @see com.mutantamoeba.ld25.utils.ParameterMap#set(int, int, java.lang.Object)
+	 */
+	@Override
+	public void set(int x, int y, Room v) {		
+		super.set(x, y, v);
+		updateDoors(x, y);
+	}
+	
+	public void setRoomTile(Room r, int rx, int ry, int layer, int tileIdx) {
+		int tileX = r.mapX * GameWorld.ROOM_SIZE + rx;
+		int tileY = r.mapY * GameWorld.ROOM_SIZE + ry;
+		Tile tile = world.tileMap.get(tileX, tileY);
+		if (tile == null) return;
+		tile.layers[layer] = tileIdx;
+	}
+	
+	private void updateDoors(int x, int y) {
+		Console.debug("updateDoors(%d, %d)", x, y);
+		Room me = get(x, y);
+		Console.debug("  room: %s", me);
+		if (me == null) return;
+		Room left = get(x-1, y);
+		Room right = get(x+1, y);
+		Room up = get(x, y-1);
+		Room down = get(x, y+1);
+		me.up = up;
+		me.down = down;
+		me.left = left;
+		me.right = right;
+		
+		// the second line in each of these assignments looks weird because it's defined
+		// in terms of the target room ("me") just for clarity of reading 
+		// (one might argue that if it was so clear, no explanation would be needed)
+		if (up != null) {
+			setRoomTile(me, 2, 0, Tile.WALL_LAYER, -1);
+			setRoomTile(me, 2, -1, Tile.WALL_LAYER, -1);
+		}
+		if (down != null) {
+			setRoomTile(me, 2, 4, Tile.WALL_LAYER, -1);
+			setRoomTile(me, 2, 5, Tile.WALL_LAYER, -1);
+		}
+		if (left != null) {
+			setRoomTile(me, 0, 2, Tile.WALL_LAYER, -1);
+			setRoomTile(me, -1, 2, Tile.WALL_LAYER, -1);
+		}
+		if (right != null) {
+			setRoomTile(me, 4, 2, Tile.WALL_LAYER, -1);
+			setRoomTile(me, 5, 2, Tile.WALL_LAYER, -1);
+		}
+	
 	}
 }
