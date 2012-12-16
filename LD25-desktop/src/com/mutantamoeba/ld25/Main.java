@@ -13,6 +13,6 @@ public class Main {
 		cfg.height = 600;		
 //		cfg.vSyncEnabled = true;
 		cfg.useCPUSynch = true;
-		new LwjglApplication(new LD25(), cfg);
+		new LwjglApplication(LD25.instance(), cfg);
 	}
 }

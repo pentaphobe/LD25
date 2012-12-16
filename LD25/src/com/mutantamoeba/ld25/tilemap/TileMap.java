@@ -16,7 +16,7 @@ public class TileMap extends ParameterMap<Tile> {
 	public TileMap(GameWorld world, int w, int h) {
 		super("tiles", w, h, empty);
 		if (empty.layers[0] == -1) {
-			empty.layers[0] = world.gameScreen.gameTiles.getTileIndex(0, 0, world.gameScreen.gameTiles.getId("blank"));
+			empty.layers[0] = world.gameScreen().gameTiles.getTileIndex(0, 0, world.gameScreen().gameTiles.getId("blank"));
 		}
 		this.world = world;
 	}

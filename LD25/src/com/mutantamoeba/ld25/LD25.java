@@ -3,13 +3,15 @@ package com.mutantamoeba.ld25;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.mutantamoeba.ld25.engine.Console;
-import com.mutantamoeba.ld25.screens.GameScreen;
+import com.mutantamoeba.ld25.screens.MainMenuScreen;
 
 public class LD25 extends Game {
 	public static boolean DEBUG_MODE = true;
-	public static final String VERSION = "0.0.1";
-	public static final String LOG = "LD25: ";
-			
+	public static final String VERSION = "0.0.2";
+	public static final String LOG = "NoMisterBond";
+	
+	static LD25 instance;
+	
 	@Override
 	public void create() {	
 		if (DEBUG_MODE) {
@@ -18,11 +20,11 @@ public class LD25 extends Game {
 		Console.debug("create");
 //		if (DEBUG_MODE) {
 			// skip the splash screen if we're in debug mode
-//			setScreen(new MainMenu(this));
+			setScreen(new MainMenuScreen(this));
 //		} else {
 //			setScreen(new SplashScreen(this));		
 //		}	
-		setScreen(new GameScreen(this));
+//		setScreen(new GameScreen(this));
 //		setScreen(new TileTestScreen(this));
 	}
 	
@@ -32,5 +34,10 @@ public class LD25 extends Game {
 		super.dispose();
 	}
 	
-	
+	public static LD25 instance() {
+		if (instance == null) {
+			instance = new LD25();
+		}
+		return instance;
+	}
 }

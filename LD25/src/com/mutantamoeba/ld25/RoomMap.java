@@ -89,9 +89,9 @@ public class RoomMap extends ParameterMap<Room> {
 		}
 		r = new Room(x, y);
 		super.set(x, y, r);
-		int floorId = this.world.gameScreen.gameTiles.getId("floor");
-		int wallId = this.world.gameScreen.gameTiles.getId("wall");
-		int wallIndices[] = this.world.gameScreen.gameTiles.getTileIndices(wallId);
+		int floorId = this.world.gameScreen().gameTiles.getId("floor");
+		int wallId = this.world.gameScreen().gameTiles.getId("wall");
+		int wallIndices[] = this.world.gameScreen().gameTiles.getTileIndices(wallId);
 		
 		int tileX = x * GameWorld.ROOM_SIZE;
 		int tileY = y * GameWorld.ROOM_SIZE;
@@ -101,7 +101,7 @@ public class RoomMap extends ParameterMap<Room> {
 			
 			for (int xx = 0; xx < GameWorld.ROOM_SIZE; xx++, offs++) {
 				Tile tile = new Tile();
-				tile.layers[Tile.FLOOR_LAYER] = this.world.gameScreen.gameTiles.getTileIndex(xx, yy, floorId);
+				tile.layers[Tile.FLOOR_LAYER] = this.world.gameScreen().gameTiles.getTileIndex(xx, yy, floorId);
 				boolean left = xx == 0;
 				boolean right = xx == GameWorld.ROOM_SIZE-1;
 				if (left || right || top || bottom) {

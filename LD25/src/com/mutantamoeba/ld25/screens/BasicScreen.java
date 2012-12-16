@@ -5,22 +5,31 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL10;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 
 public abstract class BasicScreen extends AbstractScreen {
 	protected Stage stage;
+	protected Stage uiStage;
 	private BitmapFont font;	
 	protected InputMultiplexer inputMultiplexer;
+	boolean clearScreen = true;
 	
 	public BasicScreen(Game game) {
 		super(game);
 		stage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		stage.getSpriteBatch().getProjectionMatrix().scl(1, -1, 1);
+
+		uiStage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		uiStage.setViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		
 		inputMultiplexer = new InputMultiplexer();
 		Gdx.input.setInputProcessor(inputMultiplexer);
-		inputMultiplexer.addProcessor(this);
+		
+		inputMultiplexer.addProcessor(this);		
+		inputMultiplexer.addProcessor(0, uiStage);			
 		inputMultiplexer.addProcessor(stage);
 	}
 
@@ -37,15 +46,22 @@ public abstract class BasicScreen extends AbstractScreen {
 	}
 	
 	@Override
-	public void render(float delta) {		
-		stage.act(delta);
+	public void render(float delta) {	
+		if (clearScreen) {
+			Gdx.gl.glClearColor(0,0,0,1);
+			Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		}
 		
-		Gdx.gl.glClearColor(0,0,0,1);
-		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
+		update(delta);
 		
 		stage.draw();
-
+		uiStage.draw();		
 	}
+	
+	public void update(float delta) {
+		stage.act(delta);
+		uiStage.act(delta);
+	}	
 
 	@Override
 	public void resize(int width, int height) {
@@ -89,81 +105,5 @@ public abstract class BasicScreen extends AbstractScreen {
 		// TODO Auto-generated method stub
 		
 	}
-
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyDown(int)
-//	 */
-//	@Override
-//	public boolean keyDown(int keycode) {
-//		return stage.keyDown(keycode);
-//	}
-//
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyUp(int)
-//	 */
-//	@Override
-//	public boolean keyUp(int keycode) {
-//		if (keycode == Input.Keys.F11) {
-//			toggleFullscreen();
-//		}
-//		return stage.keyUp(keycode);
-//	}
-//
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyTyped(char)
-//	 */
-//	@Override
-//	public boolean keyTyped(char character) {
-//		return stage.keyTyped(character);
-//	}
-//
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDown(int, int, int, int)
-//	 */
-//	@Override
-//	public boolean touchDown(int x, int y, int pointer, int button) {
-//		return stage.touchDown(x, y, pointer, button);
-//	}
-//
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchUp(int, int, int, int)
-//	 */
-//	@Override
-//	public boolean touchUp(int x, int y, int pointer, int button) {
-//		return stage.touchUp(x, y, pointer, button);
-//	}
-//
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDragged(int, int, int)
-//	 */
-//	@Override
-//	public boolean touchDragged(int x, int y, int pointer) {		
-//		return stage.touchDragged(x, y, pointer);
-//	}
-//
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#mouseMoved(int, int)
-//	 */
-//	@Override
-//	public boolean mouseMoved(int x, int y) {
-//		return stage.mouseMoved(x, y);
-//	}
-//
-//
-//	/* (non-Javadoc)
-//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#scrolled(int)
-//	 */
-//	@Override
-//	public boolean scrolled(int amount) {
-//		return stage.scrolled(amount);
-//	}
-
 
 }
