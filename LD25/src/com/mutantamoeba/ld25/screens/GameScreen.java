@@ -21,6 +21,7 @@ import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.GameTileset;
 import com.mutantamoeba.ld25.tilemap.TileRenderer;
 import com.mutantamoeba.ld25.tilemap.TileSubset;
@@ -55,9 +56,27 @@ public class GameScreen extends BasicScreen {
 		
 		
 		uiStage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-		uiStage.getSpriteBatch().getTransformMatrix().scale(1, -1, 1);
+		uiStage.setViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		uiStage.addListener(new ClickListener() {
+
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.utils.ClickListener#clicked(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float)
+			 */
+			@Override
+			public void clicked(InputEvent event, float x, float y) {
+				Console.debug("ui clicked!");
+				super.clicked(event, x, y);
+			}
+			
+		});
+//		uiStage.getSpriteBatch().getTransformMatrix().scale(1, -1, 1);
+		
+//		uiStage.getCamera().combined.set
+		inputMultiplexer.addProcessor(uiStage);
+		
 		Actor fpsCounter = new FpsCounter(this);
 		fpsCounter.setPosition(Gdx.graphics.getWidth() - 60, Gdx.graphics.getHeight() - 20);
+		fpsCounter.setSize(150, 100);
 		uiStage.addActor(fpsCounter);	
 		
 		world = new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT);
@@ -108,14 +127,10 @@ public class GameScreen extends BasicScreen {
 		
 		this.entities = new EntityGroup(world);
 		
-//		this.entities.set
-		
 		stage.addActor(this.entities);
-		spawnActor(100, 100);
 
-		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
-		cam.translate(stage.getWidth() / 2, stage.getHeight() / 2);
-		
+//		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
+//		cam.translate(stage.getWidth() / 2, stage.getHeight() / 2);
 	}
 	public void spawnActor(float x, float y) {
 		// [@temp just adds an entity for now]
@@ -135,8 +150,8 @@ public class GameScreen extends BasicScreen {
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		
 		update(delta);
-		stage.draw();
-//		uiStage.draw();		
+//		stage.draw();
+		uiStage.draw();		
 	}
 	
 	public void update(float delta) {
@@ -172,7 +187,8 @@ public class GameScreen extends BasicScreen {
 //			cam.translate(stage.screenToStageCoordinates(pos));
 //		}
 //		Console.debug("  %s", cam.position);
-		stage.act(delta);
+		
+//		stage.act(delta);
 		uiStage.act(delta);
 	}
 	
@@ -203,44 +219,45 @@ public class GameScreen extends BasicScreen {
 		return super.scrolled(amount);
 	}
 	
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDown(int, int, int, int)
-	 */
-	@Override
-	public  boolean touchDown(int x, int y, int pointer, int button) {
-		if (uiStage.touchDown(x, y, pointer, button)) {
-			return true;
-		}
-//		Console.debug("touchdown %d, %d", x, y);
-		
-		return stage.touchDown(x, y, pointer, button);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchUp(int, int, int, int)
-	 */
-	@Override
-	public boolean touchUp(int x, int y, int pointer, int button) {
-		if (uiStage.touchUp(x, y, pointer, button)) {
-			return true;
-		}
-		return super.touchUp(x, y, pointer, button);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDragged(int, int, int)
-	 */
-	@Override
-	public boolean touchDragged(int x, int y, int pointer) {
-
-		if (uiStage.touchDragged(x, y, pointer)) {
-			return true;
-		}
-//		Console.debug("dragged");		
-		return stage.touchDragged(x, y, pointer);
-	}
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDown(int, int, int, int)
+//	 */
+//	@Override
+//	public  boolean touchDown(int x, int y, int pointer, int button) {
+//		if (uiStage.touchDown(x, y, pointer, button)) {
+//			return true;
+//		}
+////		Console.debug("touchdown %d, %d", x, y);
+//		
+//		return stage.touchDown(x, y, pointer, button);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchUp(int, int, int, int)
+//	 */
+//	@Override
+//	public boolean touchUp(int x, int y, int pointer, int button) {
+//		if (uiStage.touchUp(x, y, pointer, button)) {
+//			return true;
+//		}
+//		return super.touchUp(x, y, pointer, button);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDragged(int, int, int)
+//	 */
+//	@Override
+//	public boolean touchDragged(int x, int y, int pointer) {
+//
+//		if (uiStage.touchDragged(x, y, pointer)) {
+//			return true;
+//		}
+////		Console.debug("dragged");		
+//		return stage.touchDragged(x, y, pointer);
+//	}
+	
 	/* (non-Javadoc)
 	 * @see com.mutantamoeba.ld25.screens.BasicScreen#keyTyped(char)
 	 */

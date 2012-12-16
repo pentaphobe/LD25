@@ -46,6 +46,7 @@ public class GameEntity extends Actor {
 		super.setPosition(x, y);
 		updateRoom((int)(x / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)), (int)(y / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)));
 	}
+	
 	private void updateRoom(int x, int y) {
 		EntityGroup par = ((EntityGroup)this.getParent());
 		Room oldRoom = room;

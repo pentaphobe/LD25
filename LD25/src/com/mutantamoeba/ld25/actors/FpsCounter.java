@@ -7,14 +7,14 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.mutantamoeba.ld25.engine.Console;
-import com.mutantamoeba.ld25.screens.GameScreen;
+import com.mutantamoeba.ld25.screens.BasicScreen;
 
 public class FpsCounter extends Actor {
-	GameScreen gameScreen;
-	public FpsCounter(GameScreen gameScreen) {
+	BasicScreen screen;
+	public FpsCounter(BasicScreen gameScreen) {
 		super();
-		this.gameScreen = gameScreen;
-		this.setSize(30, 10);
+		this.screen = gameScreen;
+		this.setSize(40, 20);
 		addListener(new ClickListener() {
 			/* (non-Javadoc)
 			 * @see com.badlogic.gdx.scenes.scene2d.utils.ClickListener#clicked(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float)
@@ -31,21 +31,12 @@ public class FpsCounter extends Actor {
 	 */
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {
-		// TODO Auto-generated method stub
-		BitmapFont fnt = gameScreen.getFont();				
+		BitmapFont fnt = screen.getFont();				
 		
 		fnt.draw(batch, 
 				String.format("FPS:%d", Gdx.graphics.getFramesPerSecond()), getX(), getY());
 		
 	}
 
-	/* (non-Javadoc)
-	 * @see com.badlogic.gdx.scenes.scene2d.Actor#act(float)
-	 */
-	@Override
-	public void act(float delta) {
-		// TODO Auto-generated method stub
-		super.act(delta);
-	}
 
 }	

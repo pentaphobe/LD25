@@ -3,6 +3,7 @@ package com.mutantamoeba.ld25.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -10,13 +11,17 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 public abstract class BasicScreen extends AbstractScreen {
 	protected Stage stage;
 	private BitmapFont font;	
+	protected InputMultiplexer inputMultiplexer;
 	
 	public BasicScreen(Game game) {
 		super(game);
 		stage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		stage.getSpriteBatch().getProjectionMatrix().scl(1, -1, 1);
-		Gdx.input.setInputProcessor(this);
 		
+		inputMultiplexer = new InputMultiplexer();
+		Gdx.input.setInputProcessor(inputMultiplexer);
+		inputMultiplexer.addProcessor(this);
+		inputMultiplexer.addProcessor(stage);
 	}
 
 	
@@ -85,80 +90,80 @@ public abstract class BasicScreen extends AbstractScreen {
 		
 	}
 
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyDown(int)
-	 */
-	@Override
-	public boolean keyDown(int keycode) {
-		return stage.keyDown(keycode);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyUp(int)
-	 */
-	@Override
-	public boolean keyUp(int keycode) {
-		if (keycode == Input.Keys.F11) {
-			toggleFullscreen();
-		}
-		return stage.keyUp(keycode);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyTyped(char)
-	 */
-	@Override
-	public boolean keyTyped(char character) {
-		return stage.keyTyped(character);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDown(int, int, int, int)
-	 */
-	@Override
-	public boolean touchDown(int x, int y, int pointer, int button) {
-		return stage.touchDown(x, y, pointer, button);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchUp(int, int, int, int)
-	 */
-	@Override
-	public boolean touchUp(int x, int y, int pointer, int button) {
-		return stage.touchUp(x, y, pointer, button);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDragged(int, int, int)
-	 */
-	@Override
-	public boolean touchDragged(int x, int y, int pointer) {		
-		return stage.touchDragged(x, y, pointer);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#mouseMoved(int, int)
-	 */
-	@Override
-	public boolean mouseMoved(int x, int y) {
-		return stage.mouseMoved(x, y);
-	}
-
-
-	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#scrolled(int)
-	 */
-	@Override
-	public boolean scrolled(int amount) {
-		return stage.scrolled(amount);
-	}
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyDown(int)
+//	 */
+//	@Override
+//	public boolean keyDown(int keycode) {
+//		return stage.keyDown(keycode);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyUp(int)
+//	 */
+//	@Override
+//	public boolean keyUp(int keycode) {
+//		if (keycode == Input.Keys.F11) {
+//			toggleFullscreen();
+//		}
+//		return stage.keyUp(keycode);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyTyped(char)
+//	 */
+//	@Override
+//	public boolean keyTyped(char character) {
+//		return stage.keyTyped(character);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDown(int, int, int, int)
+//	 */
+//	@Override
+//	public boolean touchDown(int x, int y, int pointer, int button) {
+//		return stage.touchDown(x, y, pointer, button);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchUp(int, int, int, int)
+//	 */
+//	@Override
+//	public boolean touchUp(int x, int y, int pointer, int button) {
+//		return stage.touchUp(x, y, pointer, button);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#touchDragged(int, int, int)
+//	 */
+//	@Override
+//	public boolean touchDragged(int x, int y, int pointer) {		
+//		return stage.touchDragged(x, y, pointer);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#mouseMoved(int, int)
+//	 */
+//	@Override
+//	public boolean mouseMoved(int x, int y) {
+//		return stage.mouseMoved(x, y);
+//	}
+//
+//
+//	/* (non-Javadoc)
+//	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#scrolled(int)
+//	 */
+//	@Override
+//	public boolean scrolled(int amount) {
+//		return stage.scrolled(amount);
+//	}
 
 
 }
