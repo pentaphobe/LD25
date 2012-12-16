@@ -1,5 +1,7 @@
 package com.mutantamoeba.ld25;
 
+import com.mutantamoeba.ld25.utils.ParameterMap;
+
 
 public class TileMap extends ParameterMap<Tile> {
 

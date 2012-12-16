@@ -1,4 +1,4 @@
-package com.mutantamoeba.ld25;
+package com.mutantamoeba.ld25.utils;
 
 
 public class ParameterMap<ContentType> {
