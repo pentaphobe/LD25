@@ -21,6 +21,7 @@ public class LD25 extends Game {
 //			setScreen(new SplashScreen(this));		
 //		}	
 		setScreen(new GameScreen(this));
+//		setScreen(new TileTestScreen(this));
 	}
 	
 	@Override

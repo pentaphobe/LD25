@@ -60,7 +60,7 @@ public class TileTestScreen extends BasicScreen {
 				@Override
 				public void drag(InputEvent event, float x, float y, int pointer) {
 					beginEdit();
-					setTile(x, y, 0, 32);
+					setTile(x, y, 0, 24);
 					endEdit();
 					super.drag(event, x, y, pointer);
 				}				
@@ -73,7 +73,7 @@ public class TileTestScreen extends BasicScreen {
 				@Override
 				public void clicked(InputEvent event, float x, float y) {
 					beginEdit();
-					setTile(x, y, 0, 32);
+					setTile(x, y, 0, 24);
 					endEdit();
 					super.clicked(event, x, y);
 				}
@@ -143,7 +143,7 @@ public class TileTestScreen extends BasicScreen {
 						}
 						int texX = tileIndex % textureTileWidth;
 						int texY = tileIndex / textureTileWidth;					
-						cache.add(texture, tileX, tileY, texX * tileSize, texY * tileSize, texX + tileSize, texY + tileSize);
+						cache.add(texture, tileX, tileY, texX * tileSize, texY * tileSize, tileSize, tileSize);
 					}
 				}
 			}
@@ -167,7 +167,7 @@ public class TileTestScreen extends BasicScreen {
 		super(game);
 		
 //		texture = new Texture("data/tileTest.png");
-		texture = new Texture("data/tileTest.png");
+		texture = new Texture("data/tiles.png");
 		texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
 				 	
@@ -175,7 +175,7 @@ public class TileTestScreen extends BasicScreen {
 		int wallTiles[] = new int[] { 0, 1, 2, 8, 9, 10, 16, 17, 18 };
 		tileMap.beginEdit();
 		for (int i=0;i<tileMap.area;i++) {
-			tileMap.theMap[i][0] = 33;
+			tileMap.theMap[i][0] = 27;
 			if (rand.nextInt(100) < 10) {
 				int tx = i % tileMap.textureTileWidth;
 				int ty = i / tileMap.textureTileWidth;

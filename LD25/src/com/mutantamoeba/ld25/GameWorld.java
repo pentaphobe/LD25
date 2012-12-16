@@ -15,9 +15,9 @@ public class GameWorld {
 		this.gameScreen = gameScreen;
 		this.mapWidth = mapWidth;
 		this.mapHeight = mapHeight;
-		roomMap = new RoomMap(mapWidth, mapHeight);
+		roomMap = new RoomMap(this, mapWidth, mapHeight);
 		this.tileMapWidth = mapWidth * ROOM_SIZE;
 		this.tileMapHeight = mapHeight * ROOM_SIZE;
-		tileMap = new TileMap(this.tileMapWidth, this.tileMapHeight);
+		tileMap = new TileMap(this, this.tileMapWidth, this.tileMapHeight);
 	}
 }

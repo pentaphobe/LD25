@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.engine.Console;
@@ -29,7 +30,7 @@ public class GameScreen extends BasicScreen {
 	GameWorld world;
 	RoomRenderer roomRenderer;
 	TileRenderer tileRenderer;
-	GameTileset gameTiles;
+	public GameTileset gameTiles;
 
 	public GameScreen(Game game) {
 		super(game);
@@ -39,6 +40,7 @@ public class GameScreen extends BasicScreen {
 		gameTiles = new GameTileset(texture, 32);
 
 		gameTiles.addSubset("blank", TileSubset.Type.SINGLE, 27);		
+//		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 27, 24);
 		gameTiles.addSubset("walls", TileSubset.Type.NINEPATCH, 0, 1, 2, 8, 9, 10, 16, 17, 18);
 		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
 		
@@ -62,10 +64,29 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void clicked(InputEvent event, float x, float y) {				
+				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
+				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
 				Console.debug("roomRenderer touched at %f, %f", x, y);
+
+				world.roomMap.makeBlankRoom((int)x, (int)y);
+				tileRenderer.updateFromMap();
 				super.clicked(event, x, y);
-			}
-			
+			}			
+		});
+		roomRenderer.addListener(new DragListener() {
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
+			 */
+			@Override
+			public void drag(InputEvent event, float x, float y, int pointer) {				
+				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
+				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
+				Console.debug("roomRenderer touched at %f, %f", x, y);
+
+				world.roomMap.makeBlankRoom((int)x, (int)y);
+				tileRenderer.updateFromMap();
+				super.drag(event, x, y, pointer);
+			}			
 		});
 		stage.addActor(roomRenderer);
 		
@@ -76,7 +97,7 @@ public class GameScreen extends BasicScreen {
 	 */
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(0,0,0,1);
+		Gdx.gl.glClearColor(1,0,1,1);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		
 		update(delta);
@@ -128,7 +149,7 @@ public class GameScreen extends BasicScreen {
 //		Console.debug("SCROLLED:%d", amount);
 		OrthographicCamera cam = (OrthographicCamera)stage.getCamera(); 
 		cam.zoom += amount / 10.0f;
-		float minZoom = 0.1f;
+		float minZoom = 0.5f;
 		float maxZoom = 10;
 		if (cam.zoom < minZoom) {
 			cam.zoom = minZoom;
@@ -148,7 +169,7 @@ public class GameScreen extends BasicScreen {
 		}
 		Console.debug("touchdown %d, %d", x, y);
 		
-		return super.touchDown(x, y, pointer, button);
+		return stage.touchDown(x, y, pointer, button);
 	}
 
 

@@ -17,7 +17,7 @@ public class RoomRenderer extends Actor {
 	GameWorld world;
 	public RoomRenderer(GameWorld world) {
 		super(); 
-		setSize(world.mapWidth * world.ROOM_SIZE, world.mapHeight * world.ROOM_SIZE);
+		setSize(world.mapWidth * world.ROOM_SIZE * GameScreen.TILE_SIZE, world.mapHeight * world.ROOM_SIZE * GameScreen.TILE_SIZE);
 		this.world = world;
 		if (Gdx.graphics.isGL20Available())
 			debugRenderer = new ImmediateModeRenderer20(64, false, true, 0);

@@ -46,8 +46,8 @@ public class RandomNumbers {
 	 * @return a random long
 	 */
 	static public long locHash(int x, int y) {
-//	    return ((x * 0x1337) % 157931) * ((y * 319489) % 2696063) + 9876413;
-	    return (((x * 10011101 + y) % 53781811) * ((y * 253124999 + x) % 285646799) + 9876413) ^ (x * y * 285646799);    
+	    return ((x * 0x1337) % 157931) * ((y * 319489) % 2696063) + 9876413;
+//	    return (((x * 10011101 + y) % 53781811) * ((y * 253124999 + x) % 285646799) + 9876413) ^ (x * y * 285646799);    
 	}
 	
 	static public float locFloat(int x, int y) {
