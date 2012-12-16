@@ -1,5 +1,7 @@
 package com.mutantamoeba.ld25.actors;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.GL11;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.mutantamoeba.ld25.GameWorld;
@@ -7,6 +9,7 @@ import com.mutantamoeba.ld25.GameWorld;
 public class EntityGroup extends Group {
 	GameWorld world;
 	public EntityGroup(GameWorld world) {
+		super();
 		this.world = world;
 	}
 	/* (non-Javadoc)
@@ -17,8 +20,10 @@ public class EntityGroup extends Group {
 //		for (Actor act:this.getChildren()) {
 //			Console.debug("%s", act);
 //		}
-//		Gdx.gl.glEnable(GL11.GL_TEXTURE_2D);
+		Gdx.gl.glEnable(GL11.GL_TEXTURE_2D);
+		
 		super.drawChildren(batch, parentAlpha);
+		Gdx.gl.glDisable(GL11.GL_TEXTURE_2D);
 	}
 
 }

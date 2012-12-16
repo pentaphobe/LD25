@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.mutantamoeba.ld25.GameWorld;
+import com.mutantamoeba.ld25.LD25;
 import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
@@ -106,6 +107,7 @@ public class GameScreen extends BasicScreen {
 		stage.addActor(roomRenderer);
 		
 		this.entities = new EntityGroup(world);
+		
 //		this.entities.set
 		
 		stage.addActor(this.entities);
@@ -117,7 +119,7 @@ public class GameScreen extends BasicScreen {
 	}
 	public void spawnActor(float x, float y) {
 		// [@temp just adds an entity for now]
-		TextureRegion region = new TextureRegion(texture, 0, 0, 32, 32);
+		TextureRegion region = new TextureRegion(texture, 4 * 32, 5 * 32, 32, 32);
 		Actor actor = new GameEntity(region);	
 		actor.setBounds(x, y, 32, 32);
 		actor.setOrigin(16, 16);
@@ -133,9 +135,8 @@ public class GameScreen extends BasicScreen {
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		
 		update(delta);
-				
-		stage.draw();			
-		uiStage.draw();		
+		stage.draw();
+//		uiStage.draw();		
 	}
 	
 	public void update(float delta) {
@@ -239,5 +240,17 @@ public class GameScreen extends BasicScreen {
 		}
 //		Console.debug("dragged");		
 		return stage.touchDragged(x, y, pointer);
+	}
+	/* (non-Javadoc)
+	 * @see com.mutantamoeba.ld25.screens.BasicScreen#keyTyped(char)
+	 */
+	@Override
+	public boolean keyTyped(char character) {
+		switch (character) {
+		case 'l':
+				LD25.DEBUG_MODE = false;
+				return true;
+		}
+		return super.keyTyped(character);
 	}		
 }
