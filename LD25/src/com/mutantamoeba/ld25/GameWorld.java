@@ -1,6 +1,7 @@
 package com.mutantamoeba.ld25;
 
 import com.mutantamoeba.ld25.screens.GameScreen;
+import com.mutantamoeba.ld25.tilemap.TileMap;
 
 public class GameWorld {
 	public static final int ROOM_SIZE = 5;
@@ -9,7 +10,7 @@ public class GameWorld {
 
 	public RoomMap roomMap;
 	public TileMap tileMap;
-	GameScreen gameScreen;
+	public GameScreen gameScreen;
 	
 	public GameWorld(GameScreen gameScreen, int mapWidth, int mapHeight) {
 		this.gameScreen = gameScreen;

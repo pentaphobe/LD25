@@ -9,10 +9,10 @@ public class Main {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "No, Mister Bond...";
 		cfg.useGL20 = false;
-		cfg.width = 640;
-		cfg.height = 480;		
+		cfg.width = 800;
+		cfg.height = 600;		
 //		cfg.vSyncEnabled = true;
-//		cfg.useCPUSynch = true;
+		cfg.useCPUSynch = true;
 		new LwjglApplication(new LD25(), cfg);
 	}
 }

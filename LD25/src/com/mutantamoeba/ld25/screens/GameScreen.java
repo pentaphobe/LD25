@@ -8,19 +8,26 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.mutantamoeba.ld25.GameWorld;
+import com.mutantamoeba.ld25.RoomRenderer;
+import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.engine.Console;
+import com.mutantamoeba.ld25.tilemap.GameTileset;
+import com.mutantamoeba.ld25.tilemap.TileRenderer;
+import com.mutantamoeba.ld25.tilemap.TileSubset;
 
 public class GameScreen extends BasicScreen {
 	static final int WORLD_WIDTH = 16;
 	static final int WORLD_HEIGHT = 16;
-	static final int TILE_SIZE = 32;
+	public static final int TILE_SIZE = 32;
 	static final float SCROLL_SPEED = 200f; // pixels per second
 	static final float SCROLL_FAST_MULTIPLIER = 3f; // how much faster than SCROLL_SPEED do we go in fast mode?
 	
@@ -31,6 +38,7 @@ public class GameScreen extends BasicScreen {
 	RoomRenderer roomRenderer;
 	TileRenderer tileRenderer;
 	public GameTileset gameTiles;
+	private EntityGroup entities;
 
 	public GameScreen(Game game) {
 		super(game);
@@ -48,7 +56,7 @@ public class GameScreen extends BasicScreen {
 		uiStage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		uiStage.getSpriteBatch().getTransformMatrix().scale(1, -1, 1);
 		Actor fpsCounter = new FpsCounter(this);
-		fpsCounter.setPosition(10, 20);
+		fpsCounter.setPosition(Gdx.graphics.getWidth() - 60, Gdx.graphics.getHeight() - 20);
 		uiStage.addActor(fpsCounter);	
 		
 		world = new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT);
@@ -66,9 +74,10 @@ public class GameScreen extends BasicScreen {
 			public void clicked(InputEvent event, float x, float y) {				
 				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
 				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
-				Console.debug("roomRenderer touched at %f, %f", x, y);
+//				Console.debug("roomRenderer touched at %f, %f", x, y);
 
-				world.roomMap.makeBlankRoom((int)x, (int)y);
+//				world.roomMap.makeBlankRoom((int)x, (int)y);
+				world.roomMap.makeTemplatedRoom((int)x, (int)y);				
 				tileRenderer.updateFromMap();
 				super.clicked(event, x, y);
 			}			
@@ -81,15 +90,33 @@ public class GameScreen extends BasicScreen {
 			public void drag(InputEvent event, float x, float y, int pointer) {				
 				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
 				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
-				Console.debug("roomRenderer touched at %f, %f", x, y);
+//				Console.debug("roomRenderer touched at %f, %f", x, y);
 
-				world.roomMap.makeBlankRoom((int)x, (int)y);
+//				world.roomMap.makeBlankRoom((int)x, (int)y);
+				world.roomMap.makeTemplatedRoom((int)x, (int)y);
 				tileRenderer.updateFromMap();
 				super.drag(event, x, y, pointer);
 			}			
 		});
 		stage.addActor(roomRenderer);
 		
+		this.entities = new EntityGroup();
+		stage.addActor(this.entities);
+		this.entities.addActor(new Actor() {
+
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.Actor#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch, float)
+			 */
+			@Override
+			public void draw(SpriteBatch batch, float parentAlpha) {
+				batch.draw(texture, getX(), getY(), 64, 64, 16, 16, 32, 32, false, false);
+//				super.draw(batch, parentAlpha);
+			}
+			
+		});
+
+		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
+		cam.translate(stage.getWidth() / 2, stage.getHeight() / 2);
 	}
 
 	/* (non-Javadoc)
@@ -97,7 +124,7 @@ public class GameScreen extends BasicScreen {
 	 */
 	@Override
 	public void render(float delta) {
-		Gdx.gl.glClearColor(1,0,1,1);
+//		Gdx.gl.glClearColor(0,0,0,1);
 		Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		
 		update(delta);
@@ -125,9 +152,20 @@ public class GameScreen extends BasicScreen {
 		} 
 		if (Gdx.input.isKeyPressed(Input.Keys.S)) {
 			moveY -= scrollSpeed * cam.zoom;
-		} 
+		} 		
 		cam.translate(moveX, moveY);
+
+		Vector2 pos = stage.stageToScreenCoordinates(new Vector2(0, 0));
+		boolean fixed = false;
 		
+		// [@todo constrain screen scrolling maybe]
+//		Console.debug("%s", pos);
+//		if (pos.x > 0) { pos.x = -pos.x; fixed = true; }
+//		if (pos.y > 0) { pos.y = -pos.y; fixed = true; }
+//		if (fixed) {
+//			cam.translate(stage.screenToStageCoordinates(pos));
+//		}
+//		Console.debug("  %s", cam.position);
 		stage.act(delta);
 		uiStage.act(delta);
 	}
@@ -167,7 +205,7 @@ public class GameScreen extends BasicScreen {
 		if (uiStage.touchDown(x, y, pointer, button)) {
 			return true;
 		}
-		Console.debug("touchdown %d, %d", x, y);
+//		Console.debug("touchdown %d, %d", x, y);
 		
 		return stage.touchDown(x, y, pointer, button);
 	}
@@ -194,7 +232,7 @@ public class GameScreen extends BasicScreen {
 		if (uiStage.touchDragged(x, y, pointer)) {
 			return true;
 		}
-		Console.debug("dragged");		
+//		Console.debug("dragged");		
 		return stage.touchDragged(x, y, pointer);
 	}		
 }

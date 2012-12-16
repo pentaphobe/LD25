@@ -6,13 +6,15 @@ import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class LD25 extends Game {
-	public static final boolean DEBUG_MODE = true;
+	public static final boolean DEBUG_MODE = false;
 	public static final String VERSION = "0.0.1";
 	public static final String LOG = "LD25: ";
 			
 	@Override
 	public void create() {	
-		Gdx.app.setLogLevel(Gdx.app.LOG_DEBUG);
+		if (DEBUG_MODE) {
+			Gdx.app.setLogLevel(Gdx.app.LOG_DEBUG);
+		}
 		Console.debug("create");
 //		if (DEBUG_MODE) {
 			// skip the splash screen if we're in debug mode
