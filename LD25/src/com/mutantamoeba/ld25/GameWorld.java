@@ -7,8 +7,8 @@ public class GameWorld {
 	public int mapWidth, mapHeight;
 	public int tileMapWidth, tileMapHeight;
 
-	RoomMap roomMap;
-	TileMap tileMap;
+	public RoomMap roomMap;
+	public TileMap tileMap;
 	GameScreen gameScreen;
 	
 	public GameWorld(GameScreen gameScreen, int mapWidth, int mapHeight) {
