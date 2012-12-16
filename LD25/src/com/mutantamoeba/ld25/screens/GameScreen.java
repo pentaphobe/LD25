@@ -7,8 +7,9 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -16,11 +17,13 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.LD25;
+import com.mutantamoeba.ld25.Room;
 import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.SimpleTextButton;
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.GameTileset;
 import com.mutantamoeba.ld25.tilemap.TileRenderer;
 import com.mutantamoeba.ld25.tilemap.TileSubset;
@@ -40,9 +43,13 @@ public class GameScreen extends BasicScreen {
 	TileRenderer tileRenderer;
 	public GameTileset gameTiles;
 	private EntityGroup entities;
+	private Room currentRoom;
+	RoomInspector roomInspector;
 
 	public GameScreen(Game game) {
 		super(game);
+//		setClearScreen(false);
+		
 		texture = new Texture("data/tiles.png");
 		texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
@@ -53,7 +60,10 @@ public class GameScreen extends BasicScreen {
 		gameTiles.addSubset("wall", TileSubset.Type.NINEPATCH, 16, 17, 18, 8, 9, 10, 0, 1, 2 );
 		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
 		
-
+		if (Gdx.graphics.isGL20Available()) {
+			stage.getSpriteBatch().setShader(createShader());
+		}
+		
 //		uiStage.getSpriteBatch().getTransformMatrix().scale(1, -1, 1);
 		
 //		uiStage.getCamera().combined.set
@@ -78,6 +88,20 @@ public class GameScreen extends BasicScreen {
 		budget.setPosition(10, Gdx.graphics.getHeight() - 20);		
 		uiStage.addActor(budget);
 		
+		TextureRegion region = new TextureRegion(texture, 192, 192, 64, 64);
+		NinePatch ninePatch = new NinePatch(region);
+		ninePatch.setTopHeight(8);
+		ninePatch.setBottomHeight(8);
+		ninePatch.setLeftWidth(8);
+		ninePatch.setRightWidth(8);
+		ninePatch.setPadding(2, 2, 0, 1);
+		
+		roomInspector = new RoomInspector(ninePatch, getFont());
+		roomInspector.setSize(200, 150);
+		roomInspector.setPosition(Gdx.graphics.getWidth() - roomInspector.getWidth(), Gdx.graphics.getHeight() - roomInspector.getHeight() - fpsCounter.getHeight() - 5);
+
+		uiStage.getActors().insert(0, roomInspector);
+		
 		world = new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT);
 		
 		tileRenderer = new TileRenderer(world, gameTiles);
@@ -99,9 +123,10 @@ public class GameScreen extends BasicScreen {
 				if (world.roomMap.get((int)rx, (int)ry) == null) {
 					world.roomMap.makeTemplatedRoom((int)rx, (int)ry);				
 					tileRenderer.updateFromMap();
-				} else {
-					spawnActor(x, y);
 				}
+					
+				selectRoom((int)rx, (int)ry);
+				
 				
 				super.clicked(event, x, y);
 			}			
@@ -129,7 +154,59 @@ public class GameScreen extends BasicScreen {
 		stage.addActor(this.entities);
 
 //		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
-//		cam.translate(stage.getWidth() / 2, stage.getHeight() / 2);
+//		cam.translate(1000, 1000);
+	}
+	
+	private ShaderProgram createShader() {
+	
+		String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+			+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+			+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+			+ "uniform mat4 u_projTrans;\n" //
+			+ "varying vec4 v_color;\n" //
+			+ "varying vec2 v_texCoords;\n" //
+			+ "\n" //
+			+ "void main()\n" //
+			+ "{\n" //
+			+ "   v_color = " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
+			+ "   v_texCoords = " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
+			+ "   gl_Position =  u_projTrans * " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
+			+ "}\n";
+		String fragmentShader = "#ifdef GL_ES\n" //
+			+ "#define LOWP lowp\n" //
+			+ "precision mediump float;\n" //
+			+ "#else\n" //
+			+ "#define LOWP \n" //
+			+ "#endif\n" //
+			+ "varying LOWP vec4 v_color;\n" //
+			+ "varying vec2 v_texCoords;\n" //
+			+ "uniform sampler2D u_texture;\n" //
+			+ "void main()\n"//
+			+ "{\n" //			
+			+ "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords) * vec4(0.0, 0.0, 2.0, 1);\n" //
+			+ "}";
+
+		ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
+		if (shader.isCompiled() == false) throw new IllegalArgumentException("couldn't compile shader: " + shader.getLog());
+		Console.debug("compiled custom shader");
+		
+		return shader;
+		
+	}
+
+	protected void selectRoom(int rx, int ry) {
+		Room oldSelection = currentRoom;
+		currentRoom = world.roomMap.get(rx, ry);		
+		if (currentRoom != null && currentRoom != oldSelection) {
+			roomInspector.setRoom(currentRoom);
+			roomInspector.setVisible(true);
+		} else {
+			if (currentRoom == oldSelection) {
+				// deselect
+				currentRoom = null;
+			}
+			roomInspector.setVisible(false);
+		}
 	}
 	public void spawnActor(float x, float y) {
 		// [@temp just adds an entity for now]

@@ -8,9 +8,9 @@ public class Main {
 	public static void main(String[] args) {
 		LwjglApplicationConfiguration cfg = new LwjglApplicationConfiguration();
 		cfg.title = "No, Mister Bond...";
-		cfg.useGL20 = false;
-		cfg.width = 800;
-		cfg.height = 600;		
+		cfg.useGL20 = true;
+		cfg.width = 1024;
+		cfg.height = 576;		
 //		cfg.vSyncEnabled = true;
 		cfg.useCPUSynch = true;
 		new LwjglApplication(LD25.instance(), cfg);

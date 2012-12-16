@@ -22,7 +22,7 @@ public class RoomMap extends ParameterMap<Room> {
 		int idx = RandomNumbers.nextInt(5);
 		switch (idx) {
 		case 0:
-			makeBlankRoom(x, y, new int[] {
+			makeBlankRoom(new RoomConfig("gas chamber", 3), x, y, new int[] {
 					-1, -1, -1, -1, -1,
 					-1, 40, -1, 40, -1,
 					-1, -1, -1, -1, -1,
@@ -31,7 +31,7 @@ public class RoomMap extends ParameterMap<Room> {
 				});
 			break;
 		case 1:
-			makeBlankRoom(x, y, new int[] {
+			makeBlankRoom(new RoomConfig("trap doors", 2), x, y, new int[] {
 					-1, -1, -1, -1, -1,
 					-1, -1, 56, -1, -1,
 					-1, 56, -1, 56, -1,
@@ -40,7 +40,7 @@ public class RoomMap extends ParameterMap<Room> {
 				});
 			break;
 		case 2:
-			makeBlankRoom(x, y, new int[] {
+			makeBlankRoom(new RoomConfig("trap doors", 3), x, y, new int[] {
 					-1, -1, -1, -1, -1,
 					-1, 57, -1, 57, -1,
 					-1, -1, 57, -1, -1,
@@ -49,7 +49,7 @@ public class RoomMap extends ParameterMap<Room> {
 				});
 			break;
 		case 3:
-			makeBlankRoom(x, y, new int[] {
+			makeBlankRoom(new RoomConfig("wall darts", 4), x, y, new int[] {
 					-1, -1, -1, 51, -1,
 					48, -1, -1, -1, -1,
 					-1, -1, -1, -1, -1,
@@ -58,7 +58,7 @@ public class RoomMap extends ParameterMap<Room> {
 				});
 			break;
 		case 4:
-			makeBlankRoom(x, y, new int[] {
+			makeBlankRoom(new RoomConfig("turrets", 4), x, y, new int[] {
 					35, -1, -1, -1, 34,
 					-1, -1, -1, -1, -1,
 					-1, -1, -1, -1, -1,
@@ -80,14 +80,17 @@ public class RoomMap extends ParameterMap<Room> {
 		
 	}
 	public Room makeBlankRoom(int x, int y) {
-		return makeBlankRoom(x, y, null);
+		return makeBlankRoom(new RoomConfig(), x, y, null);
 	}
 	public Room makeBlankRoom(int x, int y, int objects[]) {
+		return makeBlankRoom(new RoomConfig(), x, y, objects);
+	}
+	public Room makeBlankRoom(RoomConfig config, int x, int y, int objects[]) {
 		Room r = get(x, y);
 		if (r != null) {
 			return r;
 		}
-		r = new Room(x, y);
+		r = new Room(config, x, y);
 		super.set(x, y, r);
 		int floorId = this.world.gameScreen().gameTiles.getId("floor");
 		int wallId = this.world.gameScreen().gameTiles.getId("wall");
@@ -158,9 +161,9 @@ public class RoomMap extends ParameterMap<Room> {
 	}
 	
 	private void updateDoors(int x, int y) {
-		Console.debug("updateDoors(%d, %d)", x, y);
+//		Console.debug("updateDoors(%d, %d)", x, y);
 		Room me = get(x, y);
-		Console.debug("  room: %s", me);
+//		Console.debug("  before: %s", me);
 		if (me == null) return;
 		Room left = get(x-1, y);
 		Room right = get(x+1, y);
@@ -190,6 +193,7 @@ public class RoomMap extends ParameterMap<Room> {
 			setRoomTile(me, 4, 2, Tile.WALL_LAYER, -1);
 			setRoomTile(me, 5, 2, Tile.WALL_LAYER, -1);
 		}
+//		Console.debug("   after: %s", me);
 	
 	}
 }

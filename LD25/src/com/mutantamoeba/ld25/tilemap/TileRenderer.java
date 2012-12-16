@@ -24,6 +24,7 @@ public class TileRenderer extends Actor {
 		textureTileWidth = tileSet.texture.getWidth() / GameScreen.TILE_SIZE;
 		textureTileHeight = tileSet.texture.getHeight() / GameScreen.TILE_SIZE;
 		
+		// [@note this needs its own shader, or we need to render to texture]
 		this.cache = new SpriteCache(this.world.tileMap._area
 				* this.world.tileMap.TOTAL_LAYERS, true);
 	}
@@ -66,6 +67,7 @@ public class TileRenderer extends Actor {
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {
 		cache.setProjectionMatrix(batch.getProjectionMatrix());
+		
 //		batch.enableBlending();
 //		batch.setBlendFunction(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
 		
