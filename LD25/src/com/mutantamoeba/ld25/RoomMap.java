@@ -1,6 +1,5 @@
-package com.mutantamoeba.ld25.screens;
+package com.mutantamoeba.ld25;
 
-import com.mutantamoeba.ld25.ParameterMap;
 
 public class RoomMap extends ParameterMap<Room> {
 	public RoomMap(int w, int h) {

@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.mutantamoeba.ld25.screens;
+package com.mutantamoeba.ld25;
 
 import java.util.Random;
 
@@ -25,6 +25,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.mutantamoeba.ld25.engine.Console;
+import com.mutantamoeba.ld25.screens.BasicScreen;
 
 /** The main game screen
  * @author keili
