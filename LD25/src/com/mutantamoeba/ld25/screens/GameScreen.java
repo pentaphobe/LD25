@@ -41,7 +41,7 @@ public class GameScreen extends BasicScreen {
 
 		gameTiles.addSubset("blank", TileSubset.Type.SINGLE, 27);		
 //		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 27, 24);
-		gameTiles.addSubset("walls", TileSubset.Type.NINEPATCH, 0, 1, 2, 8, 9, 10, 16, 17, 18);
+		gameTiles.addSubset("wall", TileSubset.Type.NINEPATCH, 16, 17, 18, 8, 9, 10, 0, 1, 2 );
 		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
 		
 		
