@@ -25,6 +25,7 @@ import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.actors.SelectionBox;
 import com.mutantamoeba.ld25.actors.SidePanel;
 import com.mutantamoeba.ld25.actors.SimpleTextButton;
 import com.mutantamoeba.ld25.actors.ToolButton;
@@ -49,7 +50,10 @@ public class GameScreen extends BasicScreen {
 	TileRenderer tileRenderer;
 	public GameTileset gameTiles;
 	private EntityGroup entities;
-	private Room currentRoom;
+	public Room currentRoom;
+	SelectionBox selectionBox, toolSelectionBox;
+	public ShaderProgram shaderProgram;
+	
 	RoomInspector roomInspector;
 	private ObjectMap<String, GameTool> tools = new ObjectMap<String, GameTool>();
 	protected GameTool currentTool;
@@ -71,10 +75,6 @@ public class GameScreen extends BasicScreen {
 		gameTiles.addSubset("wall", TileSubset.Type.NINEPATCH, 16, 17, 18, 8, 9, 10, 0, 1, 2 );
 		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
 		
-		if (Gdx.graphics.isGL20Available()) {
-			stage.getSpriteBatch().setShader(createShader());
-		}
-		
 //		uiStage.getSpriteBatch().getTransformMatrix().scale(1, -1, 1);
 		
 //		uiStage.getCamera().combined.set
@@ -90,7 +90,11 @@ public class GameScreen extends BasicScreen {
 		
 		tileRenderer = new TileRenderer(getWorld(), gameTiles);
 		stage.addActor(tileRenderer);
+
 		tileRenderer.updateFromMap();
+		
+		this.entities = new EntityGroup(getWorld());		
+		stage.addActor(this.entities);		
 		
 		roomRenderer = new RoomRenderer(getWorld());
 		roomRenderer.addListener(new ClickListener() {
@@ -138,12 +142,22 @@ public class GameScreen extends BasicScreen {
 		});
 		stage.addActor(roomRenderer);
 		
-		this.entities = new EntityGroup(getWorld());
-		
-		stage.addActor(this.entities);
+		TextureRegion region = new TextureRegion(texture, 224, 160, 32, 32);
+		selectionBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
+//		selectionBox.setBounds(10, 10, TILE_SIZE * GameWorld.ROOM_SIZE, TILE_SIZE * GameWorld.ROOM_SIZE);
+		selectionBox.setZIndex(10000);
+		roomRenderer.addActor(selectionBox);
 
+		
 //		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
 //		cam.translate(1000, 1000);
+		
+		if (Gdx.graphics.isGL20Available()) {
+			shaderProgram = createShader();
+			stage.getSpriteBatch().setShader(shaderProgram);
+//			tileRenderer.setShader(sp);
+		}
+		
 	}
 	
 	private void setupUI() {
@@ -198,6 +212,11 @@ public class GameScreen extends BasicScreen {
 		buttRegions[ToolButton.HOVER] = new TextureRegion(texture, 192, 128, 32, 32);
 		buttRegions[ToolButton.DOWN] = new TextureRegion(texture, 224, 128, 32, 32);
 		
+		region = new TextureRegion(texture, 224, 160, 32, 32);
+		toolSelectionBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
+		toolSelectionBox.setZIndex(10000);
+		uiStage.addActor(toolSelectionBox);		
+		
 		ClickListener toolSelectCallback = new ClickListener() {
 			/* (non-Javadoc)
 			 * @see com.badlogic.gdx.scenes.scene2d.utils.ClickListener#clicked(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float)
@@ -207,6 +226,8 @@ public class GameScreen extends BasicScreen {
 				event.cancel();
 				String toolName = ((ToolButton)event.getTarget()).toolName;
 				selectTool(toolName);
+				ToolButton me = (ToolButton)event.getTarget();
+				toolSelectionBox.setBounds(me.getX(), me.getY(), me.getWidth(), me.getHeight());
 				super.clicked(event, x, y);
 			}			
 		};
@@ -302,11 +323,13 @@ public class GameScreen extends BasicScreen {
 	}
 
 	private ShaderProgram createShader() {
-	
+		// from SpriteBatch.java (with some tweaks)
+
 		String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
 			+ "attribute vec4 " + ShaderProgram.COLOR_ATTRIBUTE + ";\n" //
 			+ "attribute vec2 " + ShaderProgram.TEXCOORD_ATTRIBUTE + "0;\n" //
 			+ "uniform mat4 u_projTrans;\n" //
+			+ "uniform mat4 u_proj;\n" //
 			+ "varying vec4 v_color;\n" //
 			+ "varying vec2 v_texCoords;\n" //
 			+ "\n" //
@@ -327,7 +350,7 @@ public class GameScreen extends BasicScreen {
 			+ "uniform sampler2D u_texture;\n" //
 			+ "void main()\n"//
 			+ "{\n" //			
-			+ "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords) * vec4(0.0, 0.0, 2.0, 1);\n" //
+			+ "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords);\n" //
 			+ "}";
 
 		ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
@@ -341,9 +364,12 @@ public class GameScreen extends BasicScreen {
 	protected void selectRoom(int rx, int ry) {
 		Room oldSelection = currentRoom;
 		currentRoom = getWorld().roomMap.get(rx, ry);		
+		
 		if (currentRoom != null && currentRoom != oldSelection) {
 			roomInspector.setRoom(currentRoom);
 			roomInspector.setVisible(true);
+			float roomSize = TILE_SIZE * world.ROOM_SIZE;
+			selectionBox.setBounds(rx * roomSize, ry * roomSize, TILE_SIZE * GameWorld.ROOM_SIZE, TILE_SIZE * GameWorld.ROOM_SIZE);
 		} else {
 			if (currentRoom == oldSelection) {
 				// deselect
@@ -434,6 +460,13 @@ public class GameScreen extends BasicScreen {
 	@Override
 	public boolean keyTyped(char character) {
 		switch (character) {
+		case '2':
+				tileRenderer.setVisible(!tileRenderer.isVisible());
+				break;
+		case '3':
+			roomRenderer.setVisible(!roomRenderer.isVisible());
+			break;
+				
 		case 'l':
 				LD25.DEBUG_MODE = false;
 				return true;
@@ -485,6 +518,6 @@ public class GameScreen extends BasicScreen {
 	@Override
 	public void render(float delta) {		
 		super.render(delta);
-	    particleEffect.draw(stage.getSpriteBatch(), delta);
+//	    particleEffect.draw(stage.getSpriteBatch(), delta);
 	}		
 }

@@ -2,19 +2,20 @@ package com.mutantamoeba.ld25;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.GL10;
-import com.badlogic.gdx.graphics.GL11;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer10;
 import com.badlogic.gdx.graphics.glutils.ImmediateModeRenderer20;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
 
-public class RoomRenderer extends Actor {
+public class RoomRenderer extends Group {
 	static final int DEBUG_VERTICES = 32;
-	boolean DEBUG_LINES = false;;
+	public boolean DEBUG_LINES = false;
 	ImmediateModeRenderer debugRenderer;
 	
 	GameWorld world;
@@ -27,9 +28,10 @@ public class RoomRenderer extends Actor {
 		else
 			debugRenderer = new ImmediateModeRenderer10(DEBUG_VERTICES);
 	}
-	
+
 	@Override
 	public void draw(SpriteBatch batch, float delta) {
+		super.draw(batch, delta);
 		// TEMPORARY
 				
 		if (LD25.DEBUG_MODE && DEBUG_LINES) {
@@ -64,7 +66,7 @@ public class RoomRenderer extends Actor {
 			}
 			debugRenderer.end();
 		}
-		// END TEMPORARY		
+		// END TEMPORARY
 	}
 	void addLine(SpriteBatch batch, float x, float y, float x2, float y2) {
 		if (debugRenderer.getNumVertices() == DEBUG_VERTICES) {
@@ -84,4 +86,6 @@ public class RoomRenderer extends Actor {
 		
 		super.act(delta);
 	}
+
+
 }
