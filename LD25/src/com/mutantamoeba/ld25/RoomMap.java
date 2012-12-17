@@ -152,6 +152,22 @@ public class RoomMap extends ParameterMap<Room> {
 		updateDoors(x, y);
 	}
 	
+	public void remove(int x, int y) {
+		int tileX = x * GameWorld.ROOM_SIZE;
+		int tileY = y * GameWorld.ROOM_SIZE;
+		for (int yy = 0, offs=0; yy < GameWorld.ROOM_SIZE; yy++) {			
+			for (int xx = 0; xx < GameWorld.ROOM_SIZE; xx++, offs++) {
+				Tile tile = this.world.tileMap.get(tileX + xx, tileY + yy);
+				tile.clear();
+			}
+		}
+		set(x, y, null);
+		updateDoors(x-1, y);
+		updateDoors(x+1, y);
+		updateDoors(x, y-1);
+		updateDoors(x, y+1);
+	}
+	
 	public void setRoomTile(Room r, int rx, int ry, int layer, int tileIdx) {
 		int tileX = r.mapX * GameWorld.ROOM_SIZE + rx;
 		int tileY = r.mapY * GameWorld.ROOM_SIZE + ry;
@@ -159,6 +175,13 @@ public class RoomMap extends ParameterMap<Room> {
 		if (tile == null) return;
 		tile.layers[layer] = tileIdx;
 	}
+	
+	public Tile setRoomTile(Room r, int rx, int ry) {
+		int tileX = r.mapX * GameWorld.ROOM_SIZE + rx;
+		int tileY = r.mapY * GameWorld.ROOM_SIZE + ry;
+		Tile tile = world.tileMap.get(tileX, tileY);
+		return tile;
+	}	
 	
 	private void updateDoors(int x, int y) {
 //		Console.debug("updateDoors(%d, %d)", x, y);
@@ -174,23 +197,37 @@ public class RoomMap extends ParameterMap<Room> {
 		me.left = left;
 		me.right = right;
 		
+		int wallId = this.world.gameScreen().gameTiles.getId("wall");
+		int wallIndices[] = this.world.gameScreen().gameTiles.getTileIndices(wallId);
 		// the second line in each of these assignments looks weird because it's defined
 		// in terms of the target room ("me") just for clarity of reading 
 		// (one might argue that if it was so clear, no explanation would be needed)
 		if (up != null) {
 			setRoomTile(me, 2, 0, Tile.WALL_LAYER, -1);
 			setRoomTile(me, 2, -1, Tile.WALL_LAYER, -1);
+		} else {
+			setRoomTile(me, 2, 0, Tile.WALL_LAYER, wallIndices[1]);
+			setRoomTile(me, 2, -1, Tile.WALL_LAYER, -1);
 		}
 		if (down != null) {
 			setRoomTile(me, 2, 4, Tile.WALL_LAYER, -1);
+			setRoomTile(me, 2, 5, Tile.WALL_LAYER, -1);
+		}else {
+			setRoomTile(me, 2, 4, Tile.WALL_LAYER, wallIndices[7]);
 			setRoomTile(me, 2, 5, Tile.WALL_LAYER, -1);
 		}
 		if (left != null) {
 			setRoomTile(me, 0, 2, Tile.WALL_LAYER, -1);
 			setRoomTile(me, -1, 2, Tile.WALL_LAYER, -1);
+		}else {
+			setRoomTile(me, 0, 2, Tile.WALL_LAYER, wallIndices[3]);
+			setRoomTile(me, -1, 2, Tile.WALL_LAYER, -1);
 		}
 		if (right != null) {
 			setRoomTile(me, 4, 2, Tile.WALL_LAYER, -1);
+			setRoomTile(me, 5, 2, Tile.WALL_LAYER, -1);
+		}else {
+			setRoomTile(me, 4, 2, Tile.WALL_LAYER, wallIndices[5]);
 			setRoomTile(me, 5, 2, Tile.WALL_LAYER, -1);
 		}
 //		Console.debug("   after: %s", me);

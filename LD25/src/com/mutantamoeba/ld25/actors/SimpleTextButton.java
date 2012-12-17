@@ -1,9 +1,9 @@
 package com.mutantamoeba.ld25.actors;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.BitmapFont.TextBounds;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.scenes.scene2d.utils.Drawable;
 import com.mutantamoeba.ld25.screens.BasicScreen;
 
 /* a simple text button with no skinning or anything fancy
@@ -34,13 +34,14 @@ public class SimpleTextButton extends SimpleButton {
 	 */
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {
+		Color oldColor = font.getColor();
 		if (mouseOver) {
 			font.setColor(1, 0, 0, 1);
 		} else {
 			font.setColor(1, 1, 1, 1);
 		}
 		font.draw(batch, label, getX(), getY() + getHeight());
-		
+		font.setColor(oldColor);
 	}
 
 

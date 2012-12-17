@@ -53,14 +53,14 @@ public class GameWorld {
 	/**
 	 * @param economy the economy to set
 	 */
-	public void economy(GameEconomy economy) {
+	public void setEconomy(GameEconomy economy) {
 		this.economy = economy;
 	}
 
 	/**
 	 * @return the economy
 	 */
-	public GameEconomy economy() {
+	public GameEconomy getEconomy() {
 		return economy;
 	}
 }

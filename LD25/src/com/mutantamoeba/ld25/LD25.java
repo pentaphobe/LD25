@@ -26,6 +26,8 @@ public class LD25 extends Game {
 //		}	
 //		setScreen(new GameScreen(this));
 //		setScreen(new TileTestScreen(this));
+		
+		Gdx.graphics.setVSync(true);
 	}
 	
 	@Override

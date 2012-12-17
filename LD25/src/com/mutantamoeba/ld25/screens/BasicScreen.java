@@ -65,7 +65,7 @@ public abstract class BasicScreen extends AbstractScreen {
 	public void resize(int width, int height) {
 		stage.setViewport(width, height, true);
 		
-		// updates the viewport preventing GUI scaling, but also fails to scale
+		// updates the viewport preventing GUI scaling, but also requires adjustment of all widgets
 //		uiStage.setViewport(width, height, true);
 	}
 
@@ -78,9 +78,11 @@ public abstract class BasicScreen extends AbstractScreen {
 
 	public void toggleFullscreen() {
 		if (Gdx.graphics.isFullscreen()) {
-			Gdx.graphics.setDisplayMode(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
-		} else {
+			Console.debug("disabling fullscreen");
 			Gdx.graphics.setDisplayMode(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), false);
+		} else {
+			Console.debug("enabling fullscreen");
+			Gdx.graphics.setDisplayMode(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		}
 		resize(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 	}	

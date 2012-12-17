@@ -14,7 +14,7 @@ import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class RoomRenderer extends Actor {
 	static final int DEBUG_VERTICES = 32;
-	
+	boolean DEBUG_LINES = false;;
 	ImmediateModeRenderer debugRenderer;
 	
 	GameWorld world;
@@ -32,7 +32,7 @@ public class RoomRenderer extends Actor {
 	public void draw(SpriteBatch batch, float delta) {
 		// TEMPORARY
 				
-		if (LD25.DEBUG_MODE) {
+		if (LD25.DEBUG_MODE && DEBUG_LINES) {
 			debugRenderer.begin(batch.getProjectionMatrix(), GL10.GL_LINES);
 			debugRenderer.color(1, 0, 1, 0.5f);
 			int roomSizeInTiles = GameScreen.TILE_SIZE * world.ROOM_SIZE;

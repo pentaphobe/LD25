@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
@@ -15,6 +16,8 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
+import com.badlogic.gdx.utils.ObjectMap;
+import com.mutantamoeba.ld25.GameTool;
 import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.LD25;
 import com.mutantamoeba.ld25.Room;
@@ -22,7 +25,9 @@ import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.actors.SidePanel;
 import com.mutantamoeba.ld25.actors.SimpleTextButton;
+import com.mutantamoeba.ld25.actors.ToolButton;
 import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.GameTileset;
 import com.mutantamoeba.ld25.tilemap.TileRenderer;
@@ -34,17 +39,23 @@ public class GameScreen extends BasicScreen {
 	public static final int TILE_SIZE = 32;
 	static final float SCROLL_SPEED = 200f; // pixels per second
 	static final float SCROLL_FAST_MULTIPLIER = 3f; // how much faster than SCROLL_SPEED do we go in fast mode?
+	private static final float SIDEPANEL_WIDTH = 90;
 	
 	public Texture texture;
 	boolean showFPS = true;
 
-	GameWorld world;
+	private GameWorld world;
 	RoomRenderer roomRenderer;
 	TileRenderer tileRenderer;
 	public GameTileset gameTiles;
 	private EntityGroup entities;
 	private Room currentRoom;
 	RoomInspector roomInspector;
+	private ObjectMap<String, GameTool> tools = new ObjectMap<String, GameTool>();
+	protected GameTool currentTool;
+	private SidePanel sidePanel;
+	private ParticleEffect particleEffect;
+	
 
 	public GameScreen(Game game) {
 		super(game);
@@ -55,7 +66,7 @@ public class GameScreen extends BasicScreen {
 		texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
 		gameTiles = new GameTileset(texture, 32);
 
-		gameTiles.addSubset("blank", TileSubset.Type.SINGLE, 27);		
+		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 26, 27);		
 //		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 27, 24);
 		gameTiles.addSubset("wall", TileSubset.Type.NINEPATCH, 16, 17, 18, 8, 9, 10, 0, 1, 2 );
 		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
@@ -68,7 +79,74 @@ public class GameScreen extends BasicScreen {
 		
 //		uiStage.getCamera().combined.set
 
+		setupUI();
 		
+		particleEffect = new ParticleEffect();
+		particleEffect.load(Gdx.files.internal("data/particleEffects.p"), Gdx.files.internal("data"));
+		particleEffect.setPosition(0, 0);
+		
+		
+		setWorld(new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT));
+		
+		tileRenderer = new TileRenderer(getWorld(), gameTiles);
+		stage.addActor(tileRenderer);
+		tileRenderer.updateFromMap();
+		
+		roomRenderer = new RoomRenderer(getWorld());
+		roomRenderer.addListener(new ClickListener() {
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
+			 */
+			@Override
+			public void clicked(InputEvent event, float x, float y) {				
+				float rx = x / (TILE_SIZE * GameWorld.ROOM_SIZE);
+				float ry = y / (TILE_SIZE * GameWorld.ROOM_SIZE);
+
+				// test behaviour
+//				if (world.roomMap.get((int)rx, (int)ry) == null) {
+//					world.roomMap.makeTemplatedRoom((int)rx, (int)ry);				
+//					tileRenderer.updateFromMap();
+//				}					
+//				selectRoom((int)rx, (int)ry);
+				if (currentTool != null) {
+					currentTool.apply((int)rx, (int)ry);
+				}
+				
+				super.clicked(event, x, y);
+			}			
+		});
+		roomRenderer.addListener(new DragListener() {
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
+			 */
+			@Override
+			public void drag(InputEvent event, float x, float y, int pointer) {				
+				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
+				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
+
+				// test behaviour
+//				if (world.roomMap.get((int)x, (int)y) == null) {
+//					world.roomMap.makeTemplatedRoom((int)x, (int)y);
+//					tileRenderer.updateFromMap();
+//				}
+//				selectRoom((int)x, (int)y);
+				if (currentTool != null) {
+					currentTool.apply((int)x, (int)y);
+				}
+				super.drag(event, x, y, pointer);
+			}			
+		});
+		stage.addActor(roomRenderer);
+		
+		this.entities = new EntityGroup(getWorld());
+		
+		stage.addActor(this.entities);
+
+//		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
+//		cam.translate(1000, 1000);
+	}
+	
+	private void setupUI() {
 		Actor fpsCounter = new FpsCounter(this);
 		fpsCounter.setPosition(Gdx.graphics.getWidth() - 60, Gdx.graphics.getHeight() - 20);
 		uiStage.addActor(fpsCounter);	
@@ -80,7 +158,7 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void act(float delta) {
-				setLabel(String.format("budget: $%.2f", world.economy().budget()));
+				setLabel(String.format("budget: $%.2f", getWorld().getEconomy().budget()));
 				super.act(delta);
 			}
 			
@@ -100,63 +178,129 @@ public class GameScreen extends BasicScreen {
 		roomInspector.setSize(200, 150);
 		roomInspector.setPosition(Gdx.graphics.getWidth() - roomInspector.getWidth(), Gdx.graphics.getHeight() - roomInspector.getHeight() - fpsCounter.getHeight() - 5);
 
+		///////// [@note this is the first object in the list now]
 		uiStage.getActors().insert(0, roomInspector);
 		
-		world = new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT);
+		region = new TextureRegion(texture, 192, 160, 32, 32);
+		NinePatch panelPatch = new NinePatch(region, 2, 2, 2, 2);
+//		panelPatch.setTopHeight(2);
+//		panelPatch.setBottomHeight(2);
+//		panelPatch.setLeftWidth(2);
+//		panelPatch.setRightWidth(2);
+//		panelPatch.setMiddleWidth(28);
+//		panelPatch.setMiddleHeight(28);
+		sidePanel = new SidePanel(panelPatch);
+		sidePanel.setBounds(-1, -1, 96, Gdx.graphics.getHeight()+2);
+		uiStage.getActors().insert(0, sidePanel);
 		
-		tileRenderer = new TileRenderer(world, gameTiles);
-		stage.addActor(tileRenderer);
-		tileRenderer.updateFromMap();
+		TextureRegion buttRegions[] = new TextureRegion[3];
+		buttRegions[ToolButton.NORMAL] = new TextureRegion(texture, 160, 128, 32, 32);
+		buttRegions[ToolButton.HOVER] = new TextureRegion(texture, 192, 128, 32, 32);
+		buttRegions[ToolButton.DOWN] = new TextureRegion(texture, 224, 128, 32, 32);
 		
-		roomRenderer = new RoomRenderer(world);
-		roomRenderer.addListener(new ClickListener() {
+		ClickListener toolSelectCallback = new ClickListener() {
 			/* (non-Javadoc)
-			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
+			 * @see com.badlogic.gdx.scenes.scene2d.utils.ClickListener#clicked(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float)
 			 */
 			@Override
-			public void clicked(InputEvent event, float x, float y) {				
-				float rx = x / (TILE_SIZE * GameWorld.ROOM_SIZE);
-				float ry = y / (TILE_SIZE * GameWorld.ROOM_SIZE);
-//				Console.debug("roomRenderer touched at %f, %f", x, y);
-
-//				world.roomMap.makeBlankRoom((int)x, (int)y);
-				if (world.roomMap.get((int)rx, (int)ry) == null) {
-					world.roomMap.makeTemplatedRoom((int)rx, (int)ry);				
-					tileRenderer.updateFromMap();
-				}
-					
-				selectRoom((int)rx, (int)ry);
-				
-				
+			public void clicked(InputEvent event, float x, float y) {
+				event.cancel();
+				String toolName = ((ToolButton)event.getTarget()).toolName;
+				selectTool(toolName);
 				super.clicked(event, x, y);
 			}			
-		});
-		roomRenderer.addListener(new DragListener() {
-			/* (non-Javadoc)
-			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
-			 */
+		};
+		
+		ToolButton butt = new ToolButton(buttRegions, new TextureRegion(texture, 128, 96, 32, 32), "remove");
+		butt.setBounds(10, 30, 64, 64);
+		butt.addListener(toolSelectCallback);
+		sidePanel.addActor(butt);
+
+		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 96, 32, 32), "gas");
+		butt.setBounds(10, 94, 64, 64);
+		butt.addListener(toolSelectCallback);
+		sidePanel.addActor(butt);
+		
+		butt = new ToolButton(buttRegions, new TextureRegion(texture, 192, 96, 32, 32), "laser");
+		butt.setBounds(10, 158, 64, 64);
+		butt.addListener(toolSelectCallback);
+		sidePanel.addActor(butt);		
+		
+		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 96, 32, 32), "dart");
+		butt.setBounds(10, 222, 64, 64);
+		butt.addListener(toolSelectCallback);
+		sidePanel.addActor(butt);		
+		
+		setupTools();
+	}
+	public void setupTools() {
+		GameTool tool = new GameTool("remove", this, 200) {
 			@Override
-			public void drag(InputEvent event, float x, float y, int pointer) {				
-				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
-				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
-//				Console.debug("roomRenderer touched at %f, %f", x, y);
-
-//				world.roomMap.makeBlankRoom((int)x, (int)y);
-				world.roomMap.makeTemplatedRoom((int)x, (int)y);
-				tileRenderer.updateFromMap();
-				super.drag(event, x, y, pointer);
-			}			
-		});
-		stage.addActor(roomRenderer);
+			public void apply(int mx, int my) {
+				if (canApply()) {
+					getWorld().roomMap.remove(mx, my);
+					tileRenderer.updateFromMap();
+					applyCost();
+				}
+			}
+			
+		};
+		tools.put(tool.getName(), tool);
 		
-		this.entities = new EntityGroup(world);
+		tool = new GameTool("gas", this, 1000) {
+			@Override
+			public void apply(int mx, int my) {
+				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my);
+					tileRenderer.updateFromMap();
+					applyCost();
+				}
+				selectRoom((int)mx, (int)my);						
+			}
+			
+		};
+		tools.put(tool.getName(), tool);	
 		
-		stage.addActor(this.entities);
-
-//		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
-//		cam.translate(1000, 1000);
+		tool = new GameTool("laser", this, 1000) {
+			@Override
+			public void apply(int mx, int my) {
+				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my);
+					tileRenderer.updateFromMap();
+					applyCost();
+				}
+				selectRoom((int)mx, (int)my);						
+			}
+			
+		};
+		tools.put(tool.getName(), tool);			
+		
+		
+		tool = new GameTool("dart", this, 1000) {
+			@Override
+			public void apply(int mx, int my) {
+				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my);
+					tileRenderer.updateFromMap();
+					applyCost();
+				}
+				selectRoom((int)mx, (int)my);						
+			}
+			
+		};
+		tools.put(tool.getName(), tool);
+		
 	}
 	
+	public void selectTool(String toolName) {
+		Console.debug("tool select:%s", toolName);
+		if (!tools.containsKey(toolName)) {
+			Console.debug("no tool implemented for %s", toolName);
+			return;
+		}
+		currentTool = tools.get(toolName);
+	}
+
 	private ShaderProgram createShader() {
 	
 		String vertexShader = "attribute vec4 " + ShaderProgram.POSITION_ATTRIBUTE + ";\n" //
@@ -196,7 +340,7 @@ public class GameScreen extends BasicScreen {
 
 	protected void selectRoom(int rx, int ry) {
 		Room oldSelection = currentRoom;
-		currentRoom = world.roomMap.get(rx, ry);		
+		currentRoom = getWorld().roomMap.get(rx, ry);		
 		if (currentRoom != null && currentRoom != oldSelection) {
 			roomInspector.setRoom(currentRoom);
 			roomInspector.setVisible(true);
@@ -250,7 +394,7 @@ public class GameScreen extends BasicScreen {
 //			cam.translate(stage.screenToStageCoordinates(pos));
 //		}
 //		Console.debug("  %s", cam.position);
-		world.tick(delta);
+		getWorld().tick(delta);
 		
 		
 		stage.act(delta);
@@ -295,5 +439,52 @@ public class GameScreen extends BasicScreen {
 				return true;
 		}
 		return super.keyTyped(character);
+	}
+
+	/**
+	 * @param world the world to set
+	 */
+	public void setWorld(GameWorld world) {
+		this.world = world;
+	}
+
+	/**
+	 * @return the world
+	 */
+	public GameWorld getWorld() {
+		return world;
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mutantamoeba.ld25.screens.BasicScreen#resize(int, int)
+	 */
+	@Override
+	public void resize(int width, int height) {
+		super.resize(width, height);
+		if (sidePanel != null) {
+			sidePanel.setBounds(0, 0, SIDEPANEL_WIDTH, uiStage.getHeight());
+		}
+		
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyUp(int)
+	 */
+	@Override
+	public boolean keyUp(int keycode) {
+		if (keycode == Input.Keys.F11){
+			Console.debug("fullscreen toggle");
+			toggleFullscreen();
+		}
+		return super.keyUp(keycode);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.mutantamoeba.ld25.screens.BasicScreen#render(float)
+	 */
+	@Override
+	public void render(float delta) {		
+		super.render(delta);
+	    particleEffect.draw(stage.getSpriteBatch(), delta);
 	}		
 }

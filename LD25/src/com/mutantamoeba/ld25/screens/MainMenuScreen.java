@@ -1,6 +1,9 @@
 package com.mutantamoeba.ld25.screens;
 
 import com.badlogic.gdx.Game;
+import com.badlogic.gdx.Gdx;
+
+import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.mutantamoeba.ld25.LD25;
@@ -12,9 +15,10 @@ public class MainMenuScreen extends BasicScreen {
 		super(game);
 		
 		
-		SimpleTextButton butt = new SimpleTextButton(this, "> click to start <");
+		SimpleTextButton butt = new SimpleTextButton(this, "> press anything to start <");
 		stage.addActor(butt);
-		butt.setPosition(100, 100);
+		butt.setPosition((Gdx.graphics.getWidth()-butt.getWidth()) / 2, (Gdx.graphics.getHeight()-butt.getHeight()) / 2);
+		
 		butt.addListener(new ClickListener() {
 
 			/* (non-Javadoc)
@@ -29,5 +33,15 @@ public class MainMenuScreen extends BasicScreen {
 			
 			
 		});
+	}
+	
+	/* (non-Javadoc)
+	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyDown(int)
+	 */
+	@Override
+	public boolean keyDown(int keycode) {
+		LD25.instance().setScreen(new GameScreen(LD25.instance()));
+		
+		return super.keyDown(keycode);
 	}
 }

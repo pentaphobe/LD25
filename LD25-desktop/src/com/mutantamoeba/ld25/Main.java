@@ -10,9 +10,11 @@ public class Main {
 		cfg.title = "No, Mister Bond...";
 		cfg.useGL20 = true;
 		cfg.width = 1024;
-		cfg.height = 576;		
+		cfg.height = 768;	
+		cfg.fullscreen = false;
+		cfg.resizable = false;
 //		cfg.vSyncEnabled = true;
-		cfg.useCPUSynch = true;
+//		cfg.useCPUSynch = true;
 		new LwjglApplication(LD25.instance(), cfg);
 	}
 }
