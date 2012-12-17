@@ -4,12 +4,13 @@ public class RoomConfig {
 	String type;
 	int level;
 	float health;
-	RoomConfig(String type, int level) {
-		this.type = type;
-		this.level = level;
+	private RoomTemplate template;
+	RoomConfig(RoomTemplate template) {
+		this.template = template;
+		this.level = 0;
 		this.health = 100;
 	}
-	RoomConfig() {
-		this("vanilla", 1);
+	boolean canUpgrade() {
+		return this.level < this.template.maxLevel;
 	}
 }

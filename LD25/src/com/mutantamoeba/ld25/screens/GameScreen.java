@@ -236,19 +236,34 @@ public class GameScreen extends BasicScreen {
 		butt.setBounds(10, 30, 64, 64);
 		butt.addListener(toolSelectCallback);
 		sidePanel.addActor(butt);
+				
+		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 64, 32, 32), "upgrade");
+		butt.setBounds(10, 94, 64, 64);
+		butt.addListener(toolSelectCallback);
+		sidePanel.addActor(butt);		
 
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 96, 32, 32), "gas");
-		butt.setBounds(10, 94, 64, 64);
+		butt.setBounds(10, 158, 64, 64);
 		butt.addListener(toolSelectCallback);
 		sidePanel.addActor(butt);
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 192, 96, 32, 32), "laser");
-		butt.setBounds(10, 158, 64, 64);
+		butt.setBounds(10, 222, 64, 64);
 		butt.addListener(toolSelectCallback);
 		sidePanel.addActor(butt);		
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 96, 32, 32), "dart");
-		butt.setBounds(10, 222, 64, 64);
+		butt.setBounds(10, 286, 64, 64);
+		butt.addListener(toolSelectCallback);
+		sidePanel.addActor(butt);		
+		
+		butt = new ToolButton(buttRegions, new TextureRegion(texture, 192, 64, 32, 32), "trapdoor");
+		butt.setBounds(10, 350, 64, 64);
+		butt.addListener(toolSelectCallback);
+		sidePanel.addActor(butt);
+
+		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 64, 32, 32), "basic");
+		butt.setBounds(10, 350, 64, 64);
 		butt.addListener(toolSelectCallback);
 		sidePanel.addActor(butt);		
 		
@@ -267,12 +282,26 @@ public class GameScreen extends BasicScreen {
 			
 		};
 		tools.put(tool.getName(), tool);
+	
+		tool = new GameTool("basic", this, 1000) {
+			@Override
+			public void apply(int mx, int my) {
+				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("basic"));
+					tileRenderer.updateFromMap();
+					applyCost();
+				}
+				selectRoom((int)mx, (int)my);						
+			}
+			
+		};
+		tools.put(tool.getName(), tool);			
 		
 		tool = new GameTool("gas", this, 1000) {
 			@Override
 			public void apply(int mx, int my) {
 				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my);
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("gas"));
 					tileRenderer.updateFromMap();
 					applyCost();
 				}
@@ -286,7 +315,7 @@ public class GameScreen extends BasicScreen {
 			@Override
 			public void apply(int mx, int my) {
 				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my);
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("laser"));
 					tileRenderer.updateFromMap();
 					applyCost();
 				}
@@ -301,7 +330,7 @@ public class GameScreen extends BasicScreen {
 			@Override
 			public void apply(int mx, int my) {
 				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my);
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("dart"));
 					tileRenderer.updateFromMap();
 					applyCost();
 				}
@@ -311,6 +340,19 @@ public class GameScreen extends BasicScreen {
 		};
 		tools.put(tool.getName(), tool);
 		
+		tool = new GameTool("trapdoor", this, 1000) {
+			@Override
+			public void apply(int mx, int my) {
+				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
+					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("trapdoor"));
+					tileRenderer.updateFromMap();
+					applyCost();
+				}
+				selectRoom((int)mx, (int)my);						
+			}
+			
+		};
+		tools.put(tool.getName(), tool);		
 	}
 	
 	public void selectTool(String toolName) {

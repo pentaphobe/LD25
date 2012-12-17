@@ -13,7 +13,7 @@ public class SelectionBox extends Actor {
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {		
 		super.draw(batch, parentAlpha);
-		Console.debug("drawing selection: %f, %f, %f, %f", getX(), getY(), getWidth(), getHeight());
+//		Console.debug("%s drawing selection at: %f, %f - %fx%f", (Object)this, getX(), getY(), getWidth(), getHeight());
 		selectionBox.draw(batch, getX(), getY(), getWidth(), getHeight());
 	}
 }

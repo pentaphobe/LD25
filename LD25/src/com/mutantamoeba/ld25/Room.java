@@ -6,11 +6,8 @@ public class Room {
 	RoomConfig config;
 	public Room(RoomConfig config, int mapX, int mapY) {
 		this.mapX = mapX;
-		this.mapY = mapY;	
+		this.mapY = mapY;
 		this.config = config;
-	}
-	public Room(int mapX, int mapY) {
-		this(new RoomConfig(), mapX, mapY);
 	}
 	public String toString() {
 		return String.format("%s {up:%s, down:%s, left:%s, right:%s}", Room.toString(this, false), Room.toString(up, false), Room.toString(down, false),
