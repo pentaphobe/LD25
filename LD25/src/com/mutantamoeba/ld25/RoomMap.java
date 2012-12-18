@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25;
 
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.Tile;
 import com.mutantamoeba.ld25.utils.ParameterMap;
 
@@ -14,6 +15,10 @@ public class RoomMap extends ParameterMap<Room> {
 	public RoomMap(GameWorld world, int w, int h) {
 		super("rooms", w, h, null);
 		this.world = world;
+	}
+	public void makeTemplatedRoom(int x, int y, RoomConfig config) {
+		makeBlankRoom(config, x, y, config.template().objectTiles[config.level()]);
+		
 	}
 	public void makeTemplatedRoom(int x, int y, RoomTemplate roomTemplate) {
 		makeTemplatedRoom(x, y, roomTemplate, 0);
@@ -89,11 +94,11 @@ public class RoomMap extends ParameterMap<Room> {
 //		return makeBlankRoom(new RoomConfig(), x, y, objects);
 //	}
 	public Room makeBlankRoom(RoomConfig config, int x, int y, int objects[]) {
-		Room r = get(x, y);
-		if (r != null) {
-			return r;
-		}
-		r = new Room(config, x, y);
+//		Room r = get(x, y);
+//		if (r != null) {
+//			return r;
+//		}
+		Room r = new Room(config, x, y);
 		super.set(x, y, r);
 		int floorId = this.world.gameScreen().gameTiles.getId("floor");
 		int wallId = this.world.gameScreen().gameTiles.getId("wall");

@@ -21,7 +21,9 @@ import com.mutantamoeba.ld25.GameTool;
 import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.LD25;
 import com.mutantamoeba.ld25.Room;
+import com.mutantamoeba.ld25.RoomCreationTool;
 import com.mutantamoeba.ld25.RoomRenderer;
+import com.mutantamoeba.ld25.RoomUpgradeTool;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
@@ -47,7 +49,7 @@ public class GameScreen extends BasicScreen {
 
 	private GameWorld world;
 	RoomRenderer roomRenderer;
-	TileRenderer tileRenderer;
+	private TileRenderer tileRenderer;
 	public GameTileset gameTiles;
 	private EntityGroup entities;
 	public Room currentRoom;
@@ -88,10 +90,10 @@ public class GameScreen extends BasicScreen {
 		
 		setWorld(new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT));
 		
-		tileRenderer = new TileRenderer(getWorld(), gameTiles);
-		stage.addActor(tileRenderer);
+		setTileRenderer(new TileRenderer(getWorld(), gameTiles));
+		stage.addActor(getTileRenderer());
 
-		tileRenderer.updateFromMap();
+		getTileRenderer().updateFromMap();
 		
 		this.entities = new EntityGroup(getWorld());		
 		stage.addActor(this.entities);		
@@ -275,84 +277,33 @@ public class GameScreen extends BasicScreen {
 			public void apply(int mx, int my) {
 				if (canApply()) {
 					getWorld().roomMap.remove(mx, my);
-					tileRenderer.updateFromMap();
+					getTileRenderer().updateFromMap();
 					applyCost();
+					deselectRoom();
 				}
 			}
 			
 		};
 		tools.put(tool.getName(), tool);
 	
-		tool = new GameTool("basic", this, 1000) {
-			@Override
-			public void apply(int mx, int my) {
-				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("basic"));
-					tileRenderer.updateFromMap();
-					applyCost();
-				}
-				selectRoom((int)mx, (int)my);						
-			}
-			
-		};
+		tool = new RoomCreationTool("basic", this);
 		tools.put(tool.getName(), tool);			
 		
-		tool = new GameTool("gas", this, 1000) {
-			@Override
-			public void apply(int mx, int my) {
-				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("gas"));
-					tileRenderer.updateFromMap();
-					applyCost();
-				}
-				selectRoom((int)mx, (int)my);						
-			}
-			
-		};
+		tool = new RoomCreationTool("gas", this);
 		tools.put(tool.getName(), tool);	
 		
-		tool = new GameTool("laser", this, 1000) {
-			@Override
-			public void apply(int mx, int my) {
-				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("laser"));
-					tileRenderer.updateFromMap();
-					applyCost();
-				}
-				selectRoom((int)mx, (int)my);						
-			}
-			
-		};
+		tool = new RoomCreationTool("laser", this);
 		tools.put(tool.getName(), tool);			
 		
 		
-		tool = new GameTool("dart", this, 1000) {
-			@Override
-			public void apply(int mx, int my) {
-				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("dart"));
-					tileRenderer.updateFromMap();
-					applyCost();
-				}
-				selectRoom((int)mx, (int)my);						
-			}
-			
-		};
+		tool = new RoomCreationTool("dart", this);
 		tools.put(tool.getName(), tool);
 		
-		tool = new GameTool("trapdoor", this, 1000) {
-			@Override
-			public void apply(int mx, int my) {
-				if (canApply() && getWorld().roomMap.get((int)mx, (int)my) == null) {
-					getWorld().roomMap.makeTemplatedRoom((int)mx, (int)my, world.getRoomTemplate("trapdoor"));
-					tileRenderer.updateFromMap();
-					applyCost();
-				}
-				selectRoom((int)mx, (int)my);						
-			}
-			
-		};
+		tool = new RoomCreationTool("trapdoor", this);
 		tools.put(tool.getName(), tool);		
+		
+		tool =  new RoomUpgradeTool("upgrade", this);
+		tools.put(tool.getName(), tool);
 	}
 	
 	public void selectTool(String toolName) {
@@ -402,8 +353,10 @@ public class GameScreen extends BasicScreen {
 		return shader;
 		
 	}
-
-	protected void selectRoom(int rx, int ry) {
+	public void deselectRoom() {
+		currentRoom = null;
+	}
+	public void selectRoom(int rx, int ry) {
 		Room oldSelection = currentRoom;
 		currentRoom = getWorld().roomMap.get(rx, ry);		
 		
@@ -414,8 +367,7 @@ public class GameScreen extends BasicScreen {
 			selectionBox.setBounds(rx * roomSize, ry * roomSize, TILE_SIZE * GameWorld.ROOM_SIZE, TILE_SIZE * GameWorld.ROOM_SIZE);
 		} else {
 			if (currentRoom == oldSelection) {
-				// deselect
-				currentRoom = null;
+				deselectRoom();
 			}
 			roomInspector.setVisible(false);
 		}
@@ -503,7 +455,7 @@ public class GameScreen extends BasicScreen {
 	public boolean keyTyped(char character) {
 		switch (character) {
 		case '2':
-				tileRenderer.setVisible(!tileRenderer.isVisible());
+				getTileRenderer().setVisible(!getTileRenderer().isVisible());
 				break;
 		case '3':
 			roomRenderer.setVisible(!roomRenderer.isVisible());
@@ -561,5 +513,19 @@ public class GameScreen extends BasicScreen {
 	public void render(float delta) {		
 		super.render(delta);
 //	    particleEffect.draw(stage.getSpriteBatch(), delta);
+	}
+
+	/**
+	 * @param tileRenderer the tileRenderer to set
+	 */
+	public void setTileRenderer(TileRenderer tileRenderer) {
+		this.tileRenderer = tileRenderer;
+	}
+
+	/**
+	 * @return the tileRenderer
+	 */
+	public TileRenderer getTileRenderer() {
+		return tileRenderer;
 	}		
 }
