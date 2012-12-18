@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25;
 
+import com.badlogic.gdx.utils.Array;
 import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.Tile;
 import com.mutantamoeba.ld25.utils.ParameterMap;
@@ -11,7 +12,8 @@ import com.mutantamoeba.ld25.utils.ParameterMap;
  */
 public class RoomMap extends ParameterMap<Room> {
 	private GameWorld world;
-
+	Array<Room> entryRooms = new Array<Room>();
+	
 	public RoomMap(GameWorld world, int w, int h) {
 		super("rooms", w, h, null);
 		this.world = world;
@@ -94,11 +96,12 @@ public class RoomMap extends ParameterMap<Room> {
 //		return makeBlankRoom(new RoomConfig(), x, y, objects);
 //	}
 	public Room makeBlankRoom(RoomConfig config, int x, int y, int objects[]) {
-//		Room r = get(x, y);
-//		if (r != null) {
-//			return r;
-//		}
-		Room r = new Room(config, x, y);
+		Room r = get(x, y);
+		if (r != null) {
+			// cleanup
+			entryRooms.removeValue(r, true);
+		}
+		r = new Room(config, x, y);
 		super.set(x, y, r);
 		int floorId = this.world.gameScreen().gameTiles.getId("floor");
 		int wallId = this.world.gameScreen().gameTiles.getId("wall");
@@ -149,6 +152,14 @@ public class RoomMap extends ParameterMap<Room> {
 			}
 		}
 		updateDoors(x, y);
+		if (x == 0 || y == 0 || x == _w-1 | y == _h-1) {
+			entryRooms.add(r);
+			Console.debug("added entry room: %s", r);
+			Console.debug("all entries:");
+			for (Room entryRoom:entryRooms) {
+				Console.debug("  %s", entryRoom);
+			}
+		}
 		return r;
 	}
 	/* (non-Javadoc)
@@ -169,6 +180,11 @@ public class RoomMap extends ParameterMap<Room> {
 				tile.clear();
 			}
 		}
+		Room room = get(x, y);
+		if (entryRooms.contains(room, false)) {
+			entryRooms.removeValue(room, false);
+		}
+
 		set(x, y, null);
 		updateDoors(x-1, y);
 		updateDoors(x+1, y);

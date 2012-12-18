@@ -1,5 +1,7 @@
 package com.mutantamoeba.ld25;
 
+import com.mutantamoeba.ld25.screens.GameScreen;
+
 public class Room {
 	int mapX, mapY;
 	Room up, down, left, right;
@@ -40,5 +42,18 @@ public class Room {
 	public void upgrade() {
 		config.upgrade();		
 	}
-	
+	public boolean equals(Room r) {
+		return r.mapX == mapX && r.mapY == mapY;
+	}
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Room) return equals((Room)o);
+		return false;
+	}
+	public float getWorldX() {		
+		return mapX * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
+	}
+	public float getWorldY() {
+		return mapY * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
+	}
 }

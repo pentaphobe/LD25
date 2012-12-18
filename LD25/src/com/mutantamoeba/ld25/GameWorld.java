@@ -3,6 +3,7 @@ package com.mutantamoeba.ld25;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.tilemap.TileMap;
+import com.mutantamoeba.ld25.utils.RandomNumbers;
 
 public class GameWorld {
 	static GameWorld instance;
@@ -17,6 +18,7 @@ public class GameWorld {
 	
 	private GameScreen gameScreen;
 	private GameEconomy economy;
+	private GameBondSpawner spawner;
 	
 	
 	public GameWorld(GameScreen gameScreen, int mapWidth, int mapHeight) {
@@ -30,11 +32,13 @@ public class GameWorld {
 		tileMap = new TileMap(this, this.tileMapWidth, this.tileMapHeight);
 		
 		economy = new GameEconomy();
+		spawner = new GameBondSpawner(this, 1);
 		createRoomTemplates();
 	}
 
 	public void tick(float delta) {
 		economy.tick(delta);
+		spawner.tick(delta);
 	}
 	
 	public RoomTemplate addRoomTemplate(String name, int maxLevel) {
@@ -52,10 +56,13 @@ public class GameWorld {
 	private void createRoomTemplates() {
 		RoomTemplate tpl;
 		
-		tpl = addRoomTemplate("basic", 4);	
+		float roomCosts[] = new float[] { 1000, 1000, 2000, 3000 };
+		
+		tpl = addRoomTemplate("basic", 4);
+		tpl.setCosts(200, 200, 400, 800);
 		
 		tpl = addRoomTemplate("gas", 4);
-		tpl.setCosts(1000, 2000, 4000, 8000);
+		tpl.setCosts(roomCosts);
 		tpl.setObjectTiles(0, new int[] {
 			-1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,
@@ -86,7 +93,7 @@ public class GameWorld {
 		});		
 		
 		tpl = addRoomTemplate("trapdoor", 4);
-		tpl.setCosts(1000, 2000, 4000, 8000);
+		tpl.setCosts(roomCosts);
 		tpl.setObjectTiles(0, new int[] {
 			-1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,
@@ -117,7 +124,7 @@ public class GameWorld {
 		});	
 		
 		tpl = addRoomTemplate("laser", 4);
-		tpl.setCosts(1000, 2000, 4000, 8000);
+		tpl.setCosts(roomCosts);
 		tpl.setObjectTiles(0, new int[] {
 			35, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,
@@ -149,7 +156,7 @@ public class GameWorld {
 		
 		
 		tpl = addRoomTemplate("dart", 4);
-		tpl.setCosts(1000, 2000, 4000, 8000);
+		tpl.setCosts(roomCosts);
 		tpl.setObjectTiles(0, new int[] {
 			-1, -1, -1, -1, -1,
 			48, -1, -1, -1, -1,
@@ -211,5 +218,12 @@ public class GameWorld {
 	 */
 	public GameEconomy getEconomy() {
 		return economy;
+	}
+
+	public Room getRandomEdgeRoom() {
+		if (roomMap.entryRooms.size > 0) {
+			return roomMap.entryRooms.get(RandomNumbers.nextInt(roomMap.entryRooms.size));
+		}
+		return null;
 	}
 }

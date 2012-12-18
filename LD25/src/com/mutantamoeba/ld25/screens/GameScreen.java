@@ -219,18 +219,22 @@ public class GameScreen extends BasicScreen {
 		toolSelectionBox.setZIndex(10000);
 		uiStage.addActor(toolSelectionBox);		
 		
+		setupTools();
+		
 		ClickListener toolSelectCallback = new ClickListener() {
 			/* (non-Javadoc)
 			 * @see com.badlogic.gdx.scenes.scene2d.utils.ClickListener#clicked(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float)
 			 */
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				event.cancel();
-				String toolName = ((ToolButton)event.getTarget()).toolName;
-				selectTool(toolName);
-				ToolButton me = (ToolButton)event.getTarget();
-				toolSelectionBox.setBounds(me.getX(), me.getY(), me.getWidth(), me.getHeight());
-				super.clicked(event, x, y);
+				if (((ToolButton)event.getTarget()).isEnabled()) {
+					event.cancel();
+					String toolName = ((ToolButton)event.getTarget()).toolName;
+					selectTool(toolName);
+					ToolButton me = (ToolButton)event.getTarget();
+					toolSelectionBox.setBounds(me.getX(), me.getY(), me.getWidth(), me.getHeight());
+					super.clicked(event, x, y);
+				}
 			}			
 		};
 		
@@ -265,11 +269,10 @@ public class GameScreen extends BasicScreen {
 		sidePanel.addActor(butt);
 
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 64, 32, 32), "basic");
-		butt.setBounds(10, 350, 64, 64);
+		butt.setBounds(10, 414, 64, 64);
 		butt.addListener(toolSelectCallback);
 		sidePanel.addActor(butt);		
 		
-		setupTools();
 	}
 	public void setupTools() {
 		GameTool tool = new GameTool("remove", this, 200) {
@@ -293,8 +296,7 @@ public class GameScreen extends BasicScreen {
 		tools.put(tool.getName(), tool);	
 		
 		tool = new RoomCreationTool("laser", this);
-		tools.put(tool.getName(), tool);			
-		
+		tools.put(tool.getName(), tool);					
 		
 		tool = new RoomCreationTool("dart", this);
 		tools.put(tool.getName(), tool);
@@ -355,6 +357,8 @@ public class GameScreen extends BasicScreen {
 	}
 	public void deselectRoom() {
 		currentRoom = null;
+		selectionBox.setVisible(false);
+		roomInspector.setVisible(false);
 	}
 	public void selectRoom(int rx, int ry) {
 		Room oldSelection = currentRoom;
@@ -363,13 +367,13 @@ public class GameScreen extends BasicScreen {
 		if (currentRoom != null && currentRoom != oldSelection) {
 			roomInspector.setRoom(currentRoom);
 			roomInspector.setVisible(true);
+			selectionBox.setVisible(true);
 			float roomSize = TILE_SIZE * world.ROOM_SIZE;
 			selectionBox.setBounds(rx * roomSize, ry * roomSize, TILE_SIZE * GameWorld.ROOM_SIZE, TILE_SIZE * GameWorld.ROOM_SIZE);
 		} else {
 			if (currentRoom == oldSelection) {
 				deselectRoom();
 			}
-			roomInspector.setVisible(false);
 		}
 	}
 	public void spawnActor(float x, float y) {
@@ -377,7 +381,7 @@ public class GameScreen extends BasicScreen {
 		TextureRegion region = new TextureRegion(texture, 4 * 32, 5 * 32, 32, 32);
 		Actor actor = new GameEntity(region);	
 		actor.setBounds(x, y, 32, 32);
-		actor.setOrigin(16, 30);
+		actor.setOrigin(16, 0);
 		entities.addActor(actor);		
 	}
 	
@@ -460,7 +464,9 @@ public class GameScreen extends BasicScreen {
 		case '3':
 			roomRenderer.setVisible(!roomRenderer.isVisible());
 			break;
-				
+		case 'p':
+				getWorld().getEconomy().credit(100000);
+				break;
 		case 'l':
 				LD25.DEBUG_MODE = false;
 				return true;
