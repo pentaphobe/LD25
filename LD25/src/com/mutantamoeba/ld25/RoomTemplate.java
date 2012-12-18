@@ -1,10 +1,13 @@
 package com.mutantamoeba.ld25;
 
 import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.actors.TrapEntity;
 
 public class RoomTemplate {
 	public enum WallType {
-		OTHER(0), UP(1), DOWN(2), LEFT(3), RIGHT(4);
+		OTHER(0), 
+		UP(1), DOWN(2), LEFT(3), RIGHT(4),
+		UPLEFT(5), UPRIGHT(6), DOWNRIGHT(7), DOWNLEFT(8);
 		private int numVal;
 		WallType(int numVal) { this.numVal = numVal; }
 		public int val() {
@@ -16,7 +19,7 @@ public class RoomTemplate {
 	public int maxLevel;
 	int objectTiles[][];	
 	float cost[];	// 0=creation, the rest are upgrade prices
-	GameEntity traps[] = new GameEntity[5];
+	TrapEntity traps[] = new TrapEntity[9];
 	RoomTemplate(String name, int maxLevel) {
 		this.name = name;
 		this.maxLevel = maxLevel;
@@ -41,7 +44,7 @@ public class RoomTemplate {
 			cost[i] = costs[i];
 		}
 	}
-	public void setTrapEntity(WallType wallType, GameEntity entity) {
+	public void setTrapEntity(WallType wallType, TrapEntity entity) {
 		traps[wallType.val()] = entity;
 	}
 	public RoomConfig createConfig() {
@@ -59,20 +62,25 @@ public class RoomTemplate {
 	public float getCost(int level) {
 		return cost[level];
 	}
-	public void activateTraps(Room room) {
-
-	}
-	public GameEntity createTrapEntity(int xx, int yy) {
-		if (xx == 0 && traps[WallType.LEFT.val()] != null) {
-			return new GameEntity(traps[WallType.LEFT.val()]);
+	public TrapEntity createTrapEntity(int xx, int yy) {
+		if (xx == 0 && yy == 0 && traps[WallType.UPLEFT.val()] != null) {
+			return traps[WallType.UPLEFT.val()].clone();
+		} else if (xx == GameWorld.ROOM_SIZE-1 && yy == 0 && traps[WallType.UPRIGHT.val()] != null) {
+			return traps[WallType.UPRIGHT.val()].clone();
+		} else if (xx == GameWorld.ROOM_SIZE-1 && yy == GameWorld.ROOM_SIZE-1 && traps[WallType.DOWNRIGHT.val()] != null) {
+			return traps[WallType.DOWNRIGHT.val()].clone();
+		} else if (xx == 0 && yy == GameWorld.ROOM_SIZE-1 && traps[WallType.DOWNLEFT.val()] != null) {
+			return traps[WallType.DOWNLEFT.val()].clone();
+		} else if (xx == 0 && traps[WallType.LEFT.val()] != null) {
+			return traps[WallType.LEFT.val()].clone();
 		} else if (yy == 0 && traps[WallType.UP.val()] != null) {
-			return new GameEntity(traps[WallType.LEFT.val()]);
+			return traps[WallType.UP.val()].clone();
 		} else if (xx == GameWorld.ROOM_SIZE-1 && traps[WallType.RIGHT.val()] != null) {
-			return new GameEntity(traps[WallType.LEFT.val()]);
+			return traps[WallType.RIGHT.val()].clone();
 		} else if (yy == GameWorld.ROOM_SIZE-1 && traps[WallType.DOWN.val()] != null) {
-			return new GameEntity(traps[WallType.LEFT.val()]);
+			return traps[WallType.DOWN.val()].clone();
 		} else if (traps[WallType.OTHER.val()] != null) {
-			return new GameEntity(traps[WallType.OTHER.val()]);
+			return traps[WallType.OTHER.val()].clone();
 		}
 
 		return null;

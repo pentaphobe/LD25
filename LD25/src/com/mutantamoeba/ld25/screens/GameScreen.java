@@ -14,6 +14,7 @@ import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -141,6 +142,28 @@ public class GameScreen extends BasicScreen {
 					currentTool.apply((int)x, (int)y);
 				}
 				super.drag(event, x, y, pointer);
+			}			
+		});
+		roomRenderer.addListener(new InputListener() {
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
+			 */
+			@Override
+			public boolean mouseMoved(InputEvent event, float x, float y) {				
+				int mx = (int) (x / (TILE_SIZE * GameWorld.ROOM_SIZE));
+				int my = (int) (y / (TILE_SIZE * GameWorld.ROOM_SIZE));
+
+				// test behaviour
+//				if (world.roomMap.get((int)x, (int)y) == null) {
+//					world.roomMap.makeTemplatedRoom((int)x, (int)y);
+//					tileRenderer.updateFromMap();
+//				}
+//				selectRoom((int)x, (int)y);
+				Room room = world.roomMap.get(mx, my);
+				if (room != null) {
+					room.mouseMoved(x - (mx * (TILE_SIZE * GameWorld.ROOM_SIZE)), y - (my * (TILE_SIZE * GameWorld.ROOM_SIZE)));
+				}
+				return super.mouseMoved(event, x, y);
 			}			
 		});
 		stage.addActor(roomRenderer);
@@ -387,21 +410,24 @@ public class GameScreen extends BasicScreen {
 			float roomSize = TILE_SIZE * world.ROOM_SIZE;
 			selectionBox.setBounds(rx * roomSize, ry * roomSize, TILE_SIZE * GameWorld.ROOM_SIZE, TILE_SIZE * GameWorld.ROOM_SIZE);
 		} else {
-			if (currentRoom == oldSelection) {
-				deselectRoom();
+			if (currentRoom == oldSelection && currentRoom != null) {
+				//deselectRoom();
+				currentRoom.activateTraps();
 			}
 		}
 	}
 	public void spawnActor(float x, float y) {
 		// [@temp just adds an entity for now]
-		TextureRegion region = new TextureRegion(texture, 4 * 32, 5 * 32, 32, 32);
-		Actor actor = new BondEntity(region);	
+//		TextureRegion region = new TextureRegion(texture, 4 * 32, 5 * 32, 32, 32);
+//		Actor actor = new BondEntity(region);
+		Actor actor = new BondEntity(texture, 44);
 		actor.setBounds(x, y, 32, 32);
 		actor.setOrigin(16, 0);
 		entities.addActor(actor);		
 	}
 	
 	public void update(float delta) {
+		
 		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
 		float moveX = 0;
 		float moveY = 0;
@@ -434,11 +460,12 @@ public class GameScreen extends BasicScreen {
 //			cam.translate(stage.screenToStageCoordinates(pos));
 //		}
 //		Console.debug("  %s", cam.position);
-		getWorld().tick(delta);
 		
-		
-		stage.act(delta);
-		uiStage.act(delta);
+		if (!isPaused()) {
+			getWorld().tick(delta);
+			stage.act(delta);
+			uiStage.act(delta);
+		}
 	}
 	
 	/* (non-Javadoc)
@@ -486,6 +513,11 @@ public class GameScreen extends BasicScreen {
 		case 'l':
 				LD25.DEBUG_MODE = false;
 				return true;
+		case ' ':
+			Console.debug("PAUSING");
+			togglePaused();
+			return true;
+			
 		}
 		return super.keyTyped(character);
 	}

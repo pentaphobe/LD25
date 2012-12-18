@@ -2,7 +2,9 @@ package com.mutantamoeba.ld25;
 
 import com.badlogic.gdx.utils.ObjectMap;
 import com.mutantamoeba.ld25.RoomTemplate.WallType;
-import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.actors.GasVentEntity;
+import com.mutantamoeba.ld25.actors.TrapDoorEntity;
+import com.mutantamoeba.ld25.actors.TrapEntity;
 import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.tilemap.TileMap;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
@@ -65,7 +67,7 @@ public class GameWorld {
 		
 		tpl = addRoomTemplate("gas", 4);
 		tpl.setCosts(roomCosts);
-		tpl.setTrapEntity(WallType.OTHER, new GameEntity(gameScreen.texture, 57));
+		tpl.setTrapEntity(WallType.OTHER, new GasVentEntity(gameScreen.texture, 41));
 		tpl.setObjectTiles(0, new int[] {
 			-1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,
@@ -97,6 +99,8 @@ public class GameWorld {
 		
 		tpl = addRoomTemplate("trapdoor", 4);
 		tpl.setCosts(roomCosts);
+		tpl.setTrapEntity(WallType.OTHER, new TrapDoorEntity(gameScreen.texture, 57));
+		
 		tpl.setObjectTiles(0, new int[] {
 			-1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,
@@ -128,6 +132,11 @@ public class GameWorld {
 		
 		tpl = addRoomTemplate("laser", 4);
 		tpl.setCosts(roomCosts);
+		tpl.setTrapEntity(WallType.UPLEFT, new TrapEntity(gameScreen.texture, 35));		
+		tpl.setTrapEntity(WallType.UPRIGHT, new TrapEntity(gameScreen.texture, 34));
+		tpl.setTrapEntity(WallType.DOWNRIGHT, new TrapEntity(gameScreen.texture, 33));
+		tpl.setTrapEntity(WallType.DOWNLEFT, new TrapEntity(gameScreen.texture, 32));
+
 		tpl.setObjectTiles(0, new int[] {
 			35, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,
@@ -160,6 +169,11 @@ public class GameWorld {
 		
 		tpl = addRoomTemplate("dart", 4);
 		tpl.setCosts(roomCosts);
+		tpl.setTrapEntity(WallType.UP, new TrapEntity(gameScreen.texture, 51));		
+		tpl.setTrapEntity(WallType.RIGHT, new TrapEntity(gameScreen.texture, 49));
+		tpl.setTrapEntity(WallType.DOWN, new TrapEntity(gameScreen.texture, 50));
+		tpl.setTrapEntity(WallType.LEFT, new TrapEntity(gameScreen.texture, 48));
+		
 		tpl.setObjectTiles(0, new int[] {
 			-1, -1, -1, -1, -1,
 			48, -1, -1, -1, -1,

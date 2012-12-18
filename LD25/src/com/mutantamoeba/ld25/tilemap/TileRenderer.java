@@ -79,7 +79,7 @@ public class TileRenderer extends Actor {
 		Gdx.gl.glDisable(GL11.GL_BLEND);
 
 		// [@screw-you not knowing I had to do this just wasted me 3 hours]
-		// [@... apparently there's no stage management.]
+		// [@... apparently there's no state management.]
 		if (Gdx.graphics.isGL20Available()) {
 			batch.setShader(world.gameScreen().shaderProgram);
 		}

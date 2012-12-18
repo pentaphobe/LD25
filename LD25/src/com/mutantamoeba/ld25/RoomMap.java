@@ -99,6 +99,7 @@ public class RoomMap extends ParameterMap<Room> {
 		Room r = get(x, y);
 		if (r != null) {
 			// cleanup
+			r.destroy();
 			entryRooms.removeValue(r, true);
 		}
 		r = new Room(config, x, y);

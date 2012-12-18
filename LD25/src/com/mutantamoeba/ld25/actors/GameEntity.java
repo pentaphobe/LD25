@@ -12,30 +12,45 @@ import com.mutantamoeba.ld25.utils.RandomNumbers;
 public class GameEntity extends Group {	
 	TextureRegion region;
 	Room room;
+	boolean restrictToRoom = true;
+	float scale=1f, rotation=90f;
 	public GameEntity(Texture tex, int tileIndex) {
 		super();
 		int texTileWidth = tex.getWidth() / GameScreen.TILE_SIZE;
 		int tileX = tileIndex % texTileWidth;
 		int tileY = tileIndex / texTileWidth;
-		this.region = new TextureRegion(tex, tileX, tileY, GameScreen.TILE_SIZE, GameScreen.TILE_SIZE);
+		this.setOrigin(GameScreen.TILE_SIZE / 2f, GameScreen.TILE_SIZE / 2f);
+		this.region = new TextureRegion(tex, tileX * GameScreen.TILE_SIZE, tileY * GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, GameScreen.TILE_SIZE);
 	}
 	public GameEntity(TextureRegion region) {
 		super();
 		this.region = region;
+		this.setOrigin(GameScreen.TILE_SIZE / 2f, GameScreen.TILE_SIZE / 2f);
 	}
-	
 	public GameEntity(GameEntity other) {
 		super();
-		this.region = other.region;		
+		this.region = other.region;
+		this.setOrigin(other.getOriginX(), other.getOriginY());
+	}
+
+	public GameEntity clone() {
+		return new GameEntity(this);
+	}
+	public void destroy() {
+		GameWorld.instance().gameScreen().removeEntity(this);
+		if (room != null) {
+			room.removeEntity(this);
+		}
 	}
 	/* (non-Javadoc)
 	 * @see com.badlogic.gdx.scenes.scene2d.Actor#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch, float)
 	 */
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {
-		super.draw(batch, parentAlpha);
+//		super.draw(batch, parentAlpha);
 		
-		batch.draw(region, getX() - getOriginX(), getY() - getOriginY());
+//		batch.draw(region, getX() - getOriginX(), getY() - getOriginY());
+		batch.draw(region, getX(), getY(), getOriginX(), getOriginY(), GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, scale, scale, rotation, true);
 		
 //		batch.draw(GameScreen.texture, getX() - getWidth()/2, getY() - getHeight()/2, 32, 32, 32 /*texX*/, 40 /*texY*/, 32, 32, false, false);
 	}
@@ -53,8 +68,9 @@ public class GameEntity extends Group {
 	 * @see com.badlogic.gdx.scenes.scene2d.Actor#setPosition(float, float)
 	 */
 	@Override
-	public void setPosition(float x, float y) {		
-		if (updateRoom((int)(x / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)), (int)(y / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)))) {
+	public void setPosition(float x, float y) {
+		
+		if (!restrictToRoom || updateRoom((int)(x / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)), (int)(y / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)))) {
 			super.setPosition(x, y);
 		}
 	}

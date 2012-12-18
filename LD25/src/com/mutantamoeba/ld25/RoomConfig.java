@@ -1,6 +1,7 @@
 package com.mutantamoeba.ld25;
 
 import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.actors.TrapEntity;
 import com.mutantamoeba.ld25.engine.Console;
 
 public class RoomConfig {
@@ -54,9 +55,12 @@ public class RoomConfig {
 		return 0;
 	}
 	public void activateTraps(Room room) {
-		template.activateTraps(room);
+//		template.activateTraps(room);
+		for (TrapEntity trap:room.trapEntities) {
+			trap.activate();
+		}
 	}
-	public GameEntity createTrapEntity(int xx, int yy) {		
+	public TrapEntity createTrapEntity(int xx, int yy) {		
 		return template.createTrapEntity(xx, yy);
 	}
 }

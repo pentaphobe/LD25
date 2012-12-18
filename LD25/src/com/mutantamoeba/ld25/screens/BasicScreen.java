@@ -14,6 +14,7 @@ public abstract class BasicScreen extends AbstractScreen {
 	private BitmapFont font;	
 	protected InputMultiplexer inputMultiplexer;
 	boolean clearScreen = true;
+	private boolean paused;
 	
 	public BasicScreen(Game game) {
 		super(game);
@@ -57,8 +58,10 @@ public abstract class BasicScreen extends AbstractScreen {
 	}
 	
 	public void update(float delta) {
-		stage.act(delta);
-		uiStage.act(delta);
+		if (!isPaused()) {
+			stage.act(delta);
+			uiStage.act(delta);
+		}
 	}	
 
 	@Override
@@ -125,6 +128,26 @@ public abstract class BasicScreen extends AbstractScreen {
 	 */
 	public void setClearScreen(boolean clearScreen) {
 		this.clearScreen = clearScreen;
+	}
+
+
+	/**
+	 * @param paused the paused to set
+	 */
+	public void setPaused(boolean paused) {
+		this.paused = paused;
+	}
+
+	
+	public void togglePaused() {
+		this.paused = !this.paused;
+	}
+	
+	/**
+	 * @return the paused
+	 */
+	public boolean isPaused() {
+		return paused;
 	}
 
 }

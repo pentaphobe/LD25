@@ -2,6 +2,7 @@ package com.mutantamoeba.ld25;
 
 import com.badlogic.gdx.utils.Array;
 import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.actors.TrapEntity;
 import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class Room {
@@ -9,14 +10,14 @@ public class Room {
 	Room up, down, left, right;
 	private RoomConfig config;
 	Array<GameEntity> entities = new Array<GameEntity>();
-	Array<GameEntity> trapEntities = new Array<GameEntity>();
+	Array<TrapEntity> trapEntities = new Array<TrapEntity>();
 	public Room(RoomConfig config, int mapX, int mapY) {
 		this.mapX = mapX;
 		this.mapY = mapY;
 		this.config(config);
 	}
 	public void destroy() {
-		for (GameEntity trap:trapEntities) {
+		for (TrapEntity trap:trapEntities) {
 			removeTrapEntity(trap);
 		}
 	}
@@ -78,11 +79,11 @@ public class Room {
 	public void removeEntity(GameEntity e) {
 		entities.removeValue(e, true);
 	}
-	public void addTrapEntity(GameEntity e) {
+	public void addTrapEntity(TrapEntity e) {
 		trapEntities.add(e);
 		GameWorld.instance().gameScreen().addEntity(e);
 	}
-	public void removeTrapEntity(GameEntity e) {
+	public void removeTrapEntity(TrapEntity e) {
 		trapEntities.removeValue(e, true);
 		GameWorld.instance().gameScreen().removeEntity(e);
 	}	
@@ -90,10 +91,15 @@ public class Room {
 		config.activateTraps(this);
 	}
 	public void createTrapEntity(int xx, int yy) {
-		GameEntity trap = config.createTrapEntity(xx, yy);
+		TrapEntity trap = config.createTrapEntity(xx, yy);
 		if (trap == null) return;
 		trap.setPosition(getWorldX() + xx * GameScreen.TILE_SIZE, getWorldY() + yy * GameScreen.TILE_SIZE);
 		
 		addTrapEntity(trap);
+	}
+	public void mouseMoved(float x, float y) {
+		for (TrapEntity trap:trapEntities) {
+			trap.mouseMoved(x, y);
+		}
 	}
 }
