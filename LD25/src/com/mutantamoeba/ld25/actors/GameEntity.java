@@ -13,7 +13,7 @@ import com.mutantamoeba.ld25.screens.GameScreen;
 public class GameEntity extends Group {	
 	TextureRegion regions[];
 	int currentFrame = 0;
-	float frameRate = .35f;
+	float frameRate = .15f;
 	float frameRateCounter = 0;
 	
 	private Room room;
@@ -122,7 +122,7 @@ public class GameEntity extends Group {
 		if (oldRoom != room) {
 //			Console.debug("changed rooms to %s [%d, %d]", room, x, y);
 			if (room == null || !room.isInside(this)) {
-				Console.debug("room:%s inside? %s", room, room == null ? "" : (room.isInside(this) ? "true" : "false"));
+//				Console.debug("room:%s inside? %s", room, room == null ? "" : (room.isInside(this) ? "true" : "false"));
 				setRoom(oldRoom);
 				return false;
 			}

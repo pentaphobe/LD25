@@ -3,9 +3,12 @@ package com.mutantamoeba.ld25.actors;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.mutantamoeba.ld25.GameWorld;
+import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class SimpleButton extends Actor {
 	boolean mouseOver = false;
+	String toolTip = "";
 	SimpleButton() {
 		addListener(new InputListener() {
 
@@ -30,6 +33,12 @@ public class SimpleButton extends Actor {
 			}
 			
 		});
+	}
+	public String getToolTip() {
+		return toolTip;
+	}
+	public void setToolTip(String toolTip) {
+		this.toolTip = toolTip;
 	}
 	
 }

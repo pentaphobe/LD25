@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -32,7 +33,9 @@ import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.SelectionBox;
 import com.mutantamoeba.ld25.actors.SidePanel;
+import com.mutantamoeba.ld25.actors.SimpleButton;
 import com.mutantamoeba.ld25.actors.SimpleTextButton;
+import com.mutantamoeba.ld25.actors.TextBox;
 import com.mutantamoeba.ld25.actors.ToolButton;
 import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.GameTileset;
@@ -57,6 +60,7 @@ public class GameScreen extends BasicScreen {
 	private EntityGroup entities;
 	public Room currentRoom;
 	SelectionBox selectionBox, toolSelectionBox, mouseHoverBox;
+	private TextBox toolTipBox;
 	public ShaderProgram shaderProgram;
 	
 	RoomInspector roomInspector;
@@ -270,6 +274,7 @@ public class GameScreen extends BasicScreen {
 		region = new TextureRegion(texture, 224, 160, 32, 32);
 		toolSelectionBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
 		toolSelectionBox.setZIndex(10000);
+		toolSelectionBox.setTouchable(Touchable.disabled);
 		uiStage.addActor(toolSelectionBox);		
 		
 		region = new TextureRegion(texture, 160, 192, 32, 32);
@@ -296,41 +301,88 @@ public class GameScreen extends BasicScreen {
 				}
 			}			
 		};
+		InputListener toolTipCallback = new InputListener() {
+
+			@Override
+			public void enter(InputEvent event, float x, float y, int pointer,
+					Actor fromActor) {
+				Actor listener = event.getListenerActor();
+				if (listener instanceof SimpleButton) {
+					SimpleButton button = (SimpleButton)listener;
+					String tipText = button.getToolTip();
+					Console.debug("setting tool tip to %s", tipText);
+					getToolTipBox().setLabel( tipText );
+					getToolTipBox().setVisible(true);
+					if (getToolTipBox().getX() == 0 && getToolTipBox().getY() == 0) {
+						getToolTipBox().setPosition(button.getX() + button.getWidth(), button.getY());
+					} else {
+						getToolTipBox().addAction(Actions.moveTo(button.getX() + button.getWidth(), button.getY() + button.getHeight()/2f, 0.125f));
+					}
+				}
+				super.enter(event, x, y, pointer, fromActor);
+			}
+
+			@Override
+			public void exit(InputEvent event, float x, float y, int pointer,
+					Actor toActor) {
+				toolTipBox.setVisible(false);
+				super.exit(event, x, y, pointer, toActor);
+			}
+			
+		};
 		
 		ToolButton butt = new ToolButton(buttRegions, new TextureRegion(texture, 128, 96, 32, 32), "remove");
 		butt.setBounds(10, 30, 64, 64);
 		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("remove a room");
 		sidePanel.addActor(butt);
 				
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 64, 32, 32), "upgrade");
 		butt.setBounds(10, 94, 64, 64);
 		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("upgrade a room");
 		sidePanel.addActor(butt);		
 
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 96, 32, 32), "gas");
 		butt.setBounds(10, 158, 64, 64);
 		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("gas chamber");
 		sidePanel.addActor(butt);
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 192, 96, 32, 32), "laser");
 		butt.setBounds(10, 222, 64, 64);
 		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("laser turret room");
 		sidePanel.addActor(butt);		
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 96, 32, 32), "dart");
 		butt.setBounds(10, 286, 64, 64);
 		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("poison dart room");
 		sidePanel.addActor(butt);		
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 192, 64, 32, 32), "trapdoor");
 		butt.setBounds(10, 350, 64, 64);
 		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("trapdoor room");
 		sidePanel.addActor(butt);
 
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 64, 32, 32), "basic");
 		butt.setBounds(10, 414, 64, 64);
 		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("basic room");
 		sidePanel.addActor(butt);		
+		
+		setToolTipBox(new TextBox(this, "tooltip"));
+		getToolTipBox().setVisible(false);
+		uiStage.addActor(getToolTipBox());
 		
 	}
 	public void setupTools() {
@@ -625,5 +677,19 @@ public class GameScreen extends BasicScreen {
 	public GameEntity addEntity(GameEntity entity) {
 		entities.addActor(entity);
 		return entity;
+	}
+
+	/**
+	 * @param toolTipBox the toolTipBox to set
+	 */
+	public void setToolTipBox(TextBox toolTipBox) {
+		this.toolTipBox = toolTipBox;
+	}
+
+	/**
+	 * @return the toolTipBox
+	 */
+	public TextBox getToolTipBox() {
+		return toolTipBox;
 	}
 }
