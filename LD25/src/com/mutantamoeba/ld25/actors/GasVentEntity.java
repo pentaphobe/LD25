@@ -3,7 +3,6 @@ package com.mutantamoeba.ld25.actors;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mutantamoeba.ld25.GameWorld;
-import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
 
@@ -51,7 +50,7 @@ public class GasVentEntity extends TrapEntity {
 		float yOffs = (RandomNumbers.nextFloat()-0.5f) * SPAWN_RANDOM_POS + GameScreen.TILE_SIZE / 2f;
 		gas.setPosition(this.getX() + xOffs, this.getY() + yOffs);
 		gas.originalRoom = getRoom();		
-		GameWorld.instance().gameScreen().addEntity(gas);		
+		GameScreen.instance().addEntity(gas);		
 	}
 
 	@Override
@@ -59,5 +58,13 @@ public class GasVentEntity extends TrapEntity {
 		// no drawing for this entity (fix this later)
 		// [@refactor base entity should have capacity for a non-renderable]
 //		super.draw(batch, parentAlpha);
+	}
+
+	@Override
+	public void activate() {
+		if (!isActivated() && isReloaded()) {
+			GameScreen.instance().sounds.trigger("gas", .1f);
+		}
+		super.activate();
 	}	
 }

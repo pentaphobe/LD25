@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -27,13 +28,13 @@ import com.mutantamoeba.ld25.Room;
 import com.mutantamoeba.ld25.RoomCreationTool;
 import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.RoomUpgradeTool;
+import com.mutantamoeba.ld25.SoundWrapper;
 import com.mutantamoeba.ld25.actors.BondEntity;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.SelectionBox;
 import com.mutantamoeba.ld25.actors.SidePanel;
-import com.mutantamoeba.ld25.actors.SimpleButton;
 import com.mutantamoeba.ld25.actors.SimpleTextButton;
 import com.mutantamoeba.ld25.actors.TextBox;
 import com.mutantamoeba.ld25.actors.ToolButton;
@@ -67,12 +68,17 @@ public class GameScreen extends BasicScreen {
 	private ObjectMap<String, GameTool> tools = new ObjectMap<String, GameTool>();
 	protected GameTool currentTool;
 	private SidePanel sidePanel;
-	private ParticleEffect particleEffect;
-	
+	public SoundWrapper sounds;
+	private static GameScreen instance;
 
 	public GameScreen(Game game) {
 		super(game);
+		instance = this;
 //		setClearScreen(false);
+		
+		sounds = new SoundWrapper();
+		sounds.loadSound("gas", "sounds/gas.wav");
+		sounds.loadSound("trapdoor", "sounds/trapdoor.wav");
 		
 		texture = new Texture("data/tiles.png");
 		texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
@@ -88,10 +94,6 @@ public class GameScreen extends BasicScreen {
 		
 //		uiStage.getCamera().combined.set
 
-		
-		particleEffect = new ParticleEffect();
-		particleEffect.load(Gdx.files.internal("data/particleEffects.p"), Gdx.files.internal("data"));
-		particleEffect.setPosition(0, 0);
 		
 		
 		setWorld(new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT));
@@ -515,7 +517,27 @@ public class GameScreen extends BasicScreen {
 		
 		BondEntity actor = new BondEntity(texture, 44, 45);
 		actor.setBounds(x, y, 32, 32);
-		actor.setOrigin(16, 0);
+		actor.setOrigin(16, 16);
+
+		// [@todo doesn't seem to do anything - apparently I'm doing something wrong?]
+//		actor.addListener(new InputListener() {
+//			@Override
+//			public boolean mouseMoved(InputEvent event, float x, float y) {
+//				// if game is paused, dump some entity information to the console
+//				if (isPaused()) {
+//					BondEntity bond = (BondEntity)event.getListenerActor();
+//					Console.debug("actor under mouse: ");
+//					Console.debug("  current room: %d, %d", bond.getRoom().getWorldX(), bond.getRoom().getWorldY());
+//					Console.debug("  room memory:");
+//					for (Room r:bond.getPreviousRooms()) {
+//						Console.debug("    %d, %d", r.getWorldX(), r.getWorldY());
+//					}
+//				}
+//				return super.mouseMoved(event, x, y);
+//			}
+//		
+//		});
+		
 		Room room = world.roomMap.getRoomAt(actor);
 		if (room != null) {
 			room.addEntity(actor);
@@ -572,6 +594,7 @@ public class GameScreen extends BasicScreen {
 	@Override
 	public void dispose() {
 		texture.dispose();
+		sounds.dispose();
 		super.dispose();
 	}
 	
@@ -613,6 +636,10 @@ public class GameScreen extends BasicScreen {
 				return true;
 		case 'r':	// raid
 				getWorld().getSpawner().setSpawnFrequency(getWorld().getSpawner().getSpawnFrequency() * .25f);
+				return true;
+		case 'n':
+				// slows spawning a lot
+				getWorld().getSpawner().setSpawnFrequency(1000);
 				return true;
 		case ' ':
 			Console.debug("PAUSING");
@@ -704,5 +731,11 @@ public class GameScreen extends BasicScreen {
 	 */
 	public TextBox getToolTipBox() {
 		return toolTipBox;
+	}
+	
+	
+	public static GameScreen instance() {
+		return instance;
+		
 	}
 }

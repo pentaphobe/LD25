@@ -3,6 +3,7 @@ package com.mutantamoeba.ld25.actors;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.Room;
+import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.utils.MathUtils;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
 
@@ -19,7 +20,7 @@ public class GasEntity extends GameEntity {
 	public float rotationDir;
 	public Room originalRoom;
 	public GasEntity() {
-		super(GameWorld.instance().gameScreen().texture, 41);		
+		super(GameScreen.instance().texture, 41);		
 		this.setColor(1,1,1,0.25f);
 		scale = .25f;
 		rotation = RandomNumbers.nextInt(360);
@@ -54,7 +55,7 @@ public class GasEntity extends GameEntity {
 	}
 	@Override
 	public void destroy() {
-		GameWorld.instance().gameScreen().removeEntity(this);
+		GameScreen.instance().removeEntity(this);
 		if (originalRoom != null) {
 			originalRoom.removeEntity(this);
 		}

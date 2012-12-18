@@ -2,7 +2,9 @@ package com.mutantamoeba.ld25.actors;
 
 import java.util.LinkedList;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -24,7 +26,7 @@ public class BondEntity extends GameEntity {
 	
 	// switching to standard linked list since PooledLinkedList doesn't keep track of its size (!?)
 //	PooledLinkedList<Room> previousRooms = new PooledLinkedList<Room>(MEMORY_LENGTH);
-	LinkedList<Room> previousRooms = new LinkedList<Room>();
+	private LinkedList<Room> previousRooms = new LinkedList<Room>();
 
 	Vector2 waypoint = null;
 	float desiredProximity = getNewProximity();
@@ -64,6 +66,7 @@ public class BondEntity extends GameEntity {
 			
 			if (dist > desiredProximity) {
 				move.nor();
+				flipX = move.x < 0;
 				move.mul(speed);
 				setPosition(getX() + move.x * delta, getY() + move.y * delta);
 			} else {
@@ -73,6 +76,7 @@ public class BondEntity extends GameEntity {
 		} else {
 			rotation = 0;
 			health -= delta;
+			frameRate = 0;
 			if (health < -10) {
 				destroy();
 			}
@@ -105,6 +109,10 @@ public class BondEntity extends GameEntity {
 		// picking weighted by memory
 		int weights[] = new int[exits.size];
 
+//		Console.debug("### CHOOSING ROOM from %d exits", exits.size);
+//		for (Room rememberedRoom:previousRooms) {
+//			Console.debug(" -- previos: %d, %d", rememberedRoom.getMapX(), rememberedRoom.getMapY());
+//		}
 		for (int i=0;i<weights.length;i++) {
 			Room exit = exits.get(i);
 			if (exit == null) {
@@ -114,8 +122,10 @@ public class BondEntity extends GameEntity {
 			} else {
 				weights[i] = 1000;
 			}
+//			Console.debug(" %d, %d", i, weights[i]);
 		}
 		int randomRoomIndex = RandomNumbers.weightedRandom(weights);
+//		Console.debug("   Chose room index %d, weight:%d", randomRoomIndex, weights[randomRoomIndex]);
 		
 		targetRoom = exits.get(randomRoomIndex);
 		
@@ -140,7 +150,14 @@ public class BondEntity extends GameEntity {
 	public void hurt(float damage) {
 		if (health > 0) {
 			health -= damage;
+			if (health <= 0) {
+				die();
+			}
 		}
+	}
+
+	private void die() {
+		stop();
 	}
 
 	public void setWaypoint(float x, float y) {
@@ -154,10 +171,38 @@ public class BondEntity extends GameEntity {
 	@Override
 	public void setRoom(Room room) {		
 		super.setRoom(room);
-		previousRooms.add(room);
+		if (previousRooms.contains(room)) {
+			return;
+		}
+		previousRooms.addLast(room);
 		while (previousRooms.size() > MEMORY_LENGTH) {
 			previousRooms.removeFirst();
 		}
+	}
+
+	@Override
+	public void draw(SpriteBatch batch, float parentAlpha) {
+		Color oldColor = batch.getColor();
+		if (health < INITIAL_HEALTH) {
+			float norm = health / INITIAL_HEALTH;
+			batch.setColor(1, 1-norm, 1-norm, 1);
+		}
+		super.draw(batch, parentAlpha);
+		batch.setColor(oldColor);
+	}
+
+	/**
+	 * @param previousRooms the previousRooms to set
+	 */
+	public void setPreviousRooms(LinkedList<Room> previousRooms) {
+		this.previousRooms = previousRooms;
+	}
+
+	/**
+	 * @return the previousRooms
+	 */
+	public LinkedList<Room> getPreviousRooms() {
+		return previousRooms;
 	}
 	
 }

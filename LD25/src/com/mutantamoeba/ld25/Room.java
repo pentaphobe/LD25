@@ -8,14 +8,15 @@ import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class Room {
-	int mapX, mapY;
+	private int mapX;
+	private int mapY;
 	Room up, down, left, right;
 	private RoomConfig config;
 	private Array<GameEntity> entities = new Array<GameEntity>();
 	Array<TrapEntity> trapEntities = new Array<TrapEntity>();
 	public Room(RoomConfig config, int mapX, int mapY) {
-		this.mapX = mapX;
-		this.mapY = mapY;
+		this.setMapX(mapX);
+		this.setMapY(mapY);
 		this.config(config);
 	}
 	public void destroy() {
@@ -32,7 +33,7 @@ public class Room {
 		if (recurse) {
 			return room.toString();
 		} 
-		return String.format("Room[%d, %d]", room.mapX, room.mapY);
+		return String.format("Room[%d, %d]", room.getMapX(), room.getMapY());
 	}
 	public String infoString() {
 		String extra = "";
@@ -62,7 +63,7 @@ public class Room {
 		config.upgrade();		
 	}
 	public boolean equals(Room r) {
-		return r.mapX == mapX && r.mapY == mapY;
+		return r.getMapX() == getMapX() && r.getMapY() == getMapY();
 	}
 	@Override
 	public boolean equals(Object o) {
@@ -70,10 +71,10 @@ public class Room {
 		return false;
 	}
 	public float getWorldX() {		
-		return mapX * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
+		return getMapX() * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
 	}
 	public float getWorldY() {
-		return mapY * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
+		return getMapY() * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
 	}
 	public void addEntity(GameEntity e) {
 //		if (e instanceof GasEntity) {
@@ -100,11 +101,11 @@ public class Room {
 	}
 	public void addTrapEntity(TrapEntity e) {
 		trapEntities.add(e);
-		GameWorld.instance().gameScreen().addEntity(e);
+		GameScreen.instance().addEntity(e);
 	}
 	public void removeTrapEntity(TrapEntity e) {
 		trapEntities.removeValue(e, true);
-		GameWorld.instance().gameScreen().removeEntity(e);
+		GameScreen.instance().removeEntity(e);
 	}	
 	public void activateTraps() {
 		config.activateTraps(this);
@@ -128,11 +129,11 @@ public class Room {
 		}
 	}
 	public float getRelativeX(GameEntity e) {
-		float x = e.getX() - (mapX * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
+		float x = e.getX() - (getMapX() * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
 		return x;
 	}
 	public float getRelativeY(GameEntity e) {
-		float y = e.getY() - (mapY * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
+		float y = e.getY() - (getMapY() * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
 		return y;
 	}
 	
@@ -167,5 +168,29 @@ public class Room {
 		if (down != null) exits.add(down);
 		if (left != null) exits.add(left);
 		return exits;
+	}
+	/**
+	 * @param mapX the mapX to set
+	 */
+	public void setMapX(int mapX) {
+		this.mapX = mapX;
+	}
+	/**
+	 * @return the mapX
+	 */
+	public int getMapX() {
+		return mapX;
+	}
+	/**
+	 * @param mapY the mapY to set
+	 */
+	public void setMapY(int mapY) {
+		this.mapY = mapY;
+	}
+	/**
+	 * @return the mapY
+	 */
+	public int getMapY() {
+		return mapY;
 	}
 }

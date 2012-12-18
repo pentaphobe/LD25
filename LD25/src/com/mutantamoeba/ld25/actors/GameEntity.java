@@ -15,10 +15,12 @@ public class GameEntity extends Group {
 	int currentFrame = 0;
 	float frameRate = .15f;
 	float frameRateCounter = 0;
+	boolean playing = false;
 	
 	private Room room;
 	boolean restrictToRoom = true;
 	float scale=1f, rotation=90f;
+	boolean flipX = false;
 	public GameEntity(Texture tex, int tileIndex) {
 		super();
 		int texTileWidth = tex.getWidth() / GameScreen.TILE_SIZE;
@@ -41,6 +43,7 @@ public class GameEntity extends Group {
 
 			regions[i] = new TextureRegion(tex, tileX * GameScreen.TILE_SIZE, tileY * GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, GameScreen.TILE_SIZE);		
 		};
+		play();
 	}
 	
 	public GameEntity(TextureRegion region) {
@@ -54,6 +57,7 @@ public class GameEntity extends Group {
 		super();
 		this.regions = regions;
 		this.setOrigin(GameScreen.TILE_SIZE / 2f, GameScreen.TILE_SIZE / 2f);
+		play();
 	}
 	
 	public GameEntity(GameEntity other) {
@@ -66,7 +70,7 @@ public class GameEntity extends Group {
 		return new GameEntity(this);
 	}
 	public void destroy() {
-		GameWorld.instance().gameScreen().removeEntity(this);
+		GameScreen.instance().removeEntity(this);
 		if (room != null) {
 			room.removeEntity(this);
 		}
@@ -78,8 +82,8 @@ public class GameEntity extends Group {
 	public void draw(SpriteBatch batch, float parentAlpha) {
 //		super.draw(batch, parentAlpha);
 		
-//		batch.draw(region, getX() - getOriginX(), getY() - getOriginY());
-		batch.draw(regions[currentFrame], getX(), getY(), getOriginX(), getOriginY(), GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, scale, scale, rotation, true);
+//		batch.draw(region, getX() - getOriginX(), getY() - getOriginY());		
+		batch.draw(regions[currentFrame], getX(), getY(), getOriginX(), getOriginY(), GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, scale, flipX?-1:1 * scale, rotation, true);
 		
 //		batch.draw(GameScreen.texture, getX() - getWidth()/2, getY() - getHeight()/2, 32, 32, 32 /*texX*/, 40 /*texY*/, 32, 32, false, false);
 	}
@@ -90,7 +94,7 @@ public class GameEntity extends Group {
 	@Override
 	public void act(float delta) {
 		super.act(delta);
-		if (regions.length > 1) {
+		if (playing && regions.length > 1) {
 			frameRateCounter += delta;
 			if (frameRateCounter > frameRate) {
 				frameRateCounter -= frameRate;
@@ -147,5 +151,11 @@ public class GameEntity extends Group {
 		return room;
 	}
 	
+	public void stop() {
+		playing = false;
+	}
+	public void play() {
+		playing = true;
+	}
 }
 

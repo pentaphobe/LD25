@@ -37,9 +37,9 @@ public class GameEconomy {
 	}
 
 	public void debit(float amount) {
-		Console.debug("debiting %f", amount);
-		Console.debug("  budget before: %f", budget());
+//		Console.debug("debiting %f", amount);
+//		Console.debug("  budget before: %f", budget());
 		setBudget(budget() - amount);		
-		Console.debug("  budget after : %f", budget());
+//		Console.debug("  budget after : %f", budget());
 	}
 }

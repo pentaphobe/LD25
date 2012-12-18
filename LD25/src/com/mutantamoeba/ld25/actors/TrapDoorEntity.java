@@ -22,6 +22,9 @@ public class TrapDoorEntity extends TrapEntity {
 
 	@Override
 	public void activate() {
+		if (!isActivated() && isReloaded()) {
+			GameScreen.instance().sounds.trigger("trapdoor", .1f);
+		}
 		super.activate();
 	}
 
@@ -45,7 +48,7 @@ public class TrapDoorEntity extends TrapEntity {
 					float xd = bond.getX() - this.getX();
 					float yd = bond.getY() - this.getY();
 					float dist = (float)MathUtils.sqrt(xd*xd + yd*yd);
-					if (dist < GameScreen.TILE_SIZE) {
+					if (dist < GameScreen.TILE_SIZE/2f) {
 						bond.destroy();
 					}
 				}

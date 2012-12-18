@@ -161,11 +161,11 @@ public class RoomMap extends ParameterMap<Room> {
 		updateDoors(x, y);
 		if (x == 0 || y == 0 || x == _w-1 | y == _h-1) {
 			entryRooms.add(r);
-			Console.debug("added entry room: %s", r);
-			Console.debug("all entries:");
-			for (Room entryRoom:entryRooms) {
-				Console.debug("  %s", entryRoom);
-			}
+//			Console.debug("added entry room: %s", r);
+//			Console.debug("all entries:");
+//			for (Room entryRoom:entryRooms) {
+//				Console.debug("  %s", entryRoom);
+//			}
 		}
 		return r;
 	}
@@ -200,16 +200,16 @@ public class RoomMap extends ParameterMap<Room> {
 	}
 	
 	public void setRoomTile(Room r, int rx, int ry, int layer, int tileIdx) {
-		int tileX = r.mapX * GameWorld.ROOM_SIZE + rx;
-		int tileY = r.mapY * GameWorld.ROOM_SIZE + ry;
+		int tileX = r.getMapX() * GameWorld.ROOM_SIZE + rx;
+		int tileY = r.getMapY() * GameWorld.ROOM_SIZE + ry;
 		Tile tile = world.tileMap.get(tileX, tileY);
 		if (tile == null) return;
 		tile.layers[layer] = tileIdx;
 	}
 	
 	public Tile setRoomTile(Room r, int rx, int ry) {
-		int tileX = r.mapX * GameWorld.ROOM_SIZE + rx;
-		int tileY = r.mapY * GameWorld.ROOM_SIZE + ry;
+		int tileX = r.getMapX() * GameWorld.ROOM_SIZE + rx;
+		int tileY = r.getMapY() * GameWorld.ROOM_SIZE + ry;
 		Tile tile = world.tileMap.get(tileX, tileY);
 		return tile;
 	}	

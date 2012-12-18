@@ -1,6 +1,7 @@
 package com.mutantamoeba.ld25.tilemap;
 
 import com.mutantamoeba.ld25.GameWorld;
+import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class Tile {
 	public static final int FLOOR_LAYER = 0;
@@ -33,6 +34,6 @@ public class Tile {
 		for (int i=0;i<TileMap.TOTAL_LAYERS;i++) {
 			layers[i] = -1;
 		}
-		layers[0] = GameWorld.instance().gameScreen().gameTiles.getTileIndex(0, 0, GameWorld.instance().gameScreen().gameTiles.getId("blank"));
+		layers[0] = GameScreen.instance().gameTiles.getTileIndex(0, 0, GameScreen.instance().gameTiles.getId("blank"));
 	}
 }
