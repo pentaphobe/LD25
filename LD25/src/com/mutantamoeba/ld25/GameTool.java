@@ -5,21 +5,21 @@ import com.mutantamoeba.ld25.screens.GameScreen;
 public abstract class GameTool {
 	protected GameScreen gameScreen;
 	protected String name;
-	protected float cost;
+	private float cost;
 	
 	public GameTool(String name, GameScreen gameScreen, float cost) {
 		this.gameScreen = gameScreen;
-		this.cost = cost;
+		this.setCost(cost);
 		this.setName(name);
 	}
 	public void applyCost() {
-		applyCost(cost);
+		applyCost(getCost());
 	}
 	public void applyCost(float val) {
 		gameScreen.getWorld().getEconomy().debit(val);
 	}
 	public boolean canApply() {
-		return gameScreen.getWorld().getEconomy().budget() >= cost;
+		return gameScreen.getWorld().getEconomy().budget() >= getCost();
 	}
 	public boolean canApply(float dynamicCost) {
 		return gameScreen.getWorld().getEconomy().budget() >= dynamicCost;
@@ -36,5 +36,17 @@ public abstract class GameTool {
 	 */
 	public String getName() {
 		return name;
+	}
+	/**
+	 * @param cost the cost to set
+	 */
+	public void setCost(float cost) {
+		this.cost = cost;
+	}
+	/**
+	 * @return the cost
+	 */
+	public float getCost() {
+		return cost;
 	}
 }

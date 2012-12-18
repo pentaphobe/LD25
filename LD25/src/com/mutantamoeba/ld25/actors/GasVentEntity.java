@@ -50,6 +50,7 @@ public class GasVentEntity extends TrapEntity {
 		float xOffs = (RandomNumbers.nextFloat()-0.5f) * SPAWN_RANDOM_POS + GameScreen.TILE_SIZE / 2f;
 		float yOffs = (RandomNumbers.nextFloat()-0.5f) * SPAWN_RANDOM_POS + GameScreen.TILE_SIZE / 2f;
 		gas.setPosition(this.getX() + xOffs, this.getY() + yOffs);
+		gas.originalRoom = getRoom();		
 		GameWorld.instance().gameScreen().addEntity(gas);		
 	}
 

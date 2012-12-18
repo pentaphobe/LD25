@@ -47,5 +47,11 @@ public class ToolButton extends SimpleButton {
 	public void setEnabled(boolean enabled) {
 		this.enabled = enabled;
 	}
+	public String getToolName() {
+		return toolName;
+	}
+	public void setToolName(String toolName) {
+		this.toolName = toolName;
+	}
 
 }

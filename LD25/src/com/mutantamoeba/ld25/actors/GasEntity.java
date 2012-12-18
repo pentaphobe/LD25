@@ -1,10 +1,8 @@
 package com.mutantamoeba.ld25.actors;
 
-import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL11;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.mutantamoeba.ld25.GameWorld;
-import com.mutantamoeba.ld25.screens.GameScreen;
+import com.mutantamoeba.ld25.Room;
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.utils.MathUtils;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
 
@@ -19,6 +17,7 @@ public class GasEntity extends GameEntity {
 	public float ageCounter = 0;
 	public float direction;
 	public float rotationDir;
+	public Room originalRoom;
 	public GasEntity() {
 		super(GameWorld.instance().gameScreen().texture, 41);		
 		this.setColor(1,1,1,0.25f);
@@ -38,6 +37,8 @@ public class GasEntity extends GameEntity {
 			setColor(1f, 1f, 1f, MathUtils.map(ageCounter, maxAge/2f, maxAge, 1, 0));
 		}
 		if (ageCounter > maxAge) {
+//			Console.debug("Destroying");
+//			setRoom(originalRoom);
 			destroy();
 		}
 		scale += SCALE_SPEED * delta;
@@ -48,5 +49,15 @@ public class GasEntity extends GameEntity {
 		moveY += Math.sin(MathUtils.radians(direction)) * ANGULAR_SPEED;
 		direction += RandomNumbers.nextFloat()-0.5f;
 		setPosition(getX() + moveX, getY() + moveY);
+	}
+	@Override
+	public void destroy() {
+		GameWorld.instance().gameScreen().removeEntity(this);
+		if (originalRoom != null) {
+			originalRoom.removeEntity(this);
+		}
+		if (getRoom() != null) {
+			getRoom().removeEntity(this);
+		}
 	}
 }

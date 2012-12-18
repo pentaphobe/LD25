@@ -307,16 +307,23 @@ public class GameScreen extends BasicScreen {
 			public void enter(InputEvent event, float x, float y, int pointer,
 					Actor fromActor) {
 				Actor listener = event.getListenerActor();
-				if (listener instanceof SimpleButton) {
-					SimpleButton button = (SimpleButton)listener;
+				if (listener instanceof ToolButton) {
+					ToolButton button = (ToolButton)listener;
 					String tipText = button.getToolTip();
-					Console.debug("setting tool tip to %s", tipText);
-					getToolTipBox().setLabel( tipText );
+//					Console.debug("setting tool tip to %s", tipText);
+					GameTool tool = getTool(button.getToolName());
+					int cost = (int)tool.getCost(); 
+					if (cost > 0) {
+						tipText = tipText + String.format(" $%d", cost);
+					} else {
+						tipText = tipText + "$depends on room";
+					}
+					getToolTipBox().setLabel( tipText);
 					getToolTipBox().setVisible(true);
 					if (getToolTipBox().getX() == 0 && getToolTipBox().getY() == 0) {
 						getToolTipBox().setPosition(button.getX() + button.getWidth(), button.getY());
 					} else {
-						getToolTipBox().addAction(Actions.moveTo(button.getX() + button.getWidth(), button.getY() + button.getHeight()/2f, 0.125f));
+						getToolTipBox().addAction(Actions.moveTo(button.getX() + button.getWidth(), button.getY() + button.getHeight()/2f, 0.075f));
 					}
 				}
 				super.enter(event, x, y, pointer, fromActor);
@@ -418,14 +425,20 @@ public class GameScreen extends BasicScreen {
 		tool =  new RoomUpgradeTool("upgrade", this);
 		tools.put(tool.getName(), tool);
 	}
-	
-	public void selectTool(String toolName) {
-		Console.debug("tool select:%s", toolName);
+	public GameTool getTool(String toolName) {
+//		Console.debug("tool select:%s", toolName);
 		if (!tools.containsKey(toolName)) {
 			Console.debug("no tool implemented for %s", toolName);
-			return;
+			return null;
 		}
-		currentTool = tools.get(toolName);
+		return tools.get(toolName);
+		
+	}
+	public void selectTool(String toolName) {
+		GameTool tool = getTool(toolName);
+		if (tool != null) {
+			currentTool = tool;
+		}
 	}
 
 	private ShaderProgram createShader() {

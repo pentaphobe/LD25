@@ -75,6 +75,9 @@ public class Room {
 		return mapY * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
 	}
 	public void addEntity(GameEntity e) {
+		if (getEntities().contains(e, true)) {
+			return;
+		}
 		getEntities().add(e);
 	}
 	public void removeEntity(GameEntity e) {

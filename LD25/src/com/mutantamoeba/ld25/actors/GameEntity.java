@@ -67,8 +67,8 @@ public class GameEntity extends Group {
 	}
 	public void destroy() {
 		GameWorld.instance().gameScreen().removeEntity(this);
-		if (getRoom() != null) {
-			getRoom().removeEntity(this);
+		if (room != null) {
+			room.removeEntity(this);
 		}
 	}
 	/* (non-Javadoc)
