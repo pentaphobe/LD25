@@ -2,6 +2,7 @@ package com.mutantamoeba.ld25;
 
 import com.badlogic.gdx.utils.Array;
 import com.mutantamoeba.ld25.actors.GameEntity;
+import com.mutantamoeba.ld25.actors.GasEntity;
 import com.mutantamoeba.ld25.actors.TrapEntity;
 import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
@@ -75,6 +76,9 @@ public class Room {
 		return mapY * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
 	}
 	public void addEntity(GameEntity e) {
+//		if (e instanceof GasEntity) {
+//			Console.debug("adding %s to %s", e, this);
+//		}
 		if (getEntities().contains(e, true)) {
 			return;
 		}
@@ -84,6 +88,14 @@ public class Room {
 		if (e.getRoom() == this) {
 			e.setRoom(null);
 		}
+//		if (e instanceof GasEntity) {
+//			Console.debug("removing %s from %s", e, this);
+////			Console.debug("  entity list:");
+////			for (GameEntity ent:getEntities()) {
+////				Console.debug("    %s", ent);
+////			}
+//		}
+
 		getEntities().removeValue(e, true);
 	}
 	public void addTrapEntity(TrapEntity e) {

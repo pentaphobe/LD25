@@ -51,7 +51,7 @@ public class RoomConfig {
 		if (canUpgrade()) {
 			return this.template.cost[level()+1];
 		}
-		Console.debug("Can't upgrade");
+//		Console.debug("Can't upgrade");
 		return 0;
 	}
 	public void activateTraps(Room room) {

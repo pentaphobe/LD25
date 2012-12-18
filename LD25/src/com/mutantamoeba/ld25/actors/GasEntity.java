@@ -1,13 +1,13 @@
 package com.mutantamoeba.ld25.actors;
 
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.Room;
-import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.utils.MathUtils;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
 
 public class GasEntity extends GameEntity {
-	private static final float DISPERSION_SPEED = 6f;
+	private static final float DISPERSION_SPEED = 2f;
 	private static final float UP_SPEED = 0.5f;
 	private static final float SCALE_SPEED = .75f;
 	private static final float ROTATION_SPEED = 90;
@@ -38,7 +38,7 @@ public class GasEntity extends GameEntity {
 		}
 		if (ageCounter > maxAge) {
 //			Console.debug("Destroying");
-//			setRoom(originalRoom);
+			setRoom(originalRoom);
 			destroy();
 		}
 		scale += SCALE_SPEED * delta;
@@ -48,7 +48,9 @@ public class GasEntity extends GameEntity {
 		moveX += Math.cos(MathUtils.radians(direction)) * ANGULAR_SPEED;
 		moveY += Math.sin(MathUtils.radians(direction)) * ANGULAR_SPEED;
 		direction += RandomNumbers.nextFloat()-0.5f;
-		setPosition(getX() + moveX, getY() + moveY);
+		setX(getX() + moveX);
+		setY(getY() + moveY);
+//		setPosition(getX() + moveX, getY() + moveY);
 	}
 	@Override
 	public void destroy() {
