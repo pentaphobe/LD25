@@ -172,6 +172,7 @@ public class GameScreen extends BasicScreen {
 		selectionBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
 //		selectionBox.setBounds(10, 10, TILE_SIZE * GameWorld.ROOM_SIZE, TILE_SIZE * GameWorld.ROOM_SIZE);
 		selectionBox.setZIndex(10000);
+		selectionBox.setVisible(false);
 		roomRenderer.addActor(selectionBox);
 
 		
@@ -485,7 +486,7 @@ public class GameScreen extends BasicScreen {
 //		Console.debug("SCROLLED:%d", amount);
 		OrthographicCamera cam = (OrthographicCamera)stage.getCamera(); 
 		cam.zoom += amount / 10.0f;
-		float minZoom = 0.5f;
+		float minZoom = 0.25f;
 		float maxZoom = 10;
 		if (cam.zoom < minZoom) {
 			cam.zoom = minZoom;

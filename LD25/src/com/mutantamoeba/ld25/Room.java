@@ -9,7 +9,7 @@ public class Room {
 	int mapX, mapY;
 	Room up, down, left, right;
 	private RoomConfig config;
-	Array<GameEntity> entities = new Array<GameEntity>();
+	private Array<GameEntity> entities = new Array<GameEntity>();
 	Array<TrapEntity> trapEntities = new Array<TrapEntity>();
 	public Room(RoomConfig config, int mapX, int mapY) {
 		this.mapX = mapX;
@@ -42,7 +42,7 @@ public class Room {
 							 "level   : %d\n" +
 							 "entities: %d\n" +
 							 "extra   :\n" +
-							 " %s\n", config().type, config().health, config().level()+1, entities.size, extra);
+							 " %s\n", config().type, config().health, config().level()+1, getEntities().size, extra);
 	}
 	/**
 	 * @param config the config to set
@@ -74,10 +74,10 @@ public class Room {
 		return mapY * GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE;
 	}
 	public void addEntity(GameEntity e) {
-		entities.add(e);
+		getEntities().add(e);
 	}
 	public void removeEntity(GameEntity e) {
-		entities.removeValue(e, true);
+		getEntities().removeValue(e, true);
 	}
 	public void addTrapEntity(TrapEntity e) {
 		trapEntities.add(e);
@@ -101,5 +101,23 @@ public class Room {
 		for (TrapEntity trap:trapEntities) {
 			trap.mouseMoved(x, y);
 		}
+	}
+	public void inheritEntities(Room oldRoom) {
+		setEntities(oldRoom.getEntities());
+		for (GameEntity ent:getEntities()) {
+			ent.setRoom(this);
+		}
+	}
+	/**
+	 * @param entities the entities to set
+	 */
+	public void setEntities(Array<GameEntity> entities) {
+		this.entities = entities;
+	}
+	/**
+	 * @return the entities
+	 */
+	public Array<GameEntity> getEntities() {
+		return entities;
 	}
 }

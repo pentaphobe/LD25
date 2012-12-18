@@ -12,7 +12,8 @@ public class RoomCreationTool extends GameTool {
 		
 		RoomTemplate tpl = world.getRoomTemplate(name);
 		cost = gameScreen.getWorld().getRoomTemplate(name).getCost();
-		if (canApply() && world.roomMap.get((int)mx, (int)my) == null) {
+		Room existingRoom = world.roomMap.get((int)mx, (int)my);
+		if (canApply() && (existingRoom == null || existingRoom.config().type.equals("basic")) ) {
 			world.roomMap.makeTemplatedRoom((int)mx, (int)my, tpl);
 			gameScreen.getTileRenderer().updateFromMap();
 			applyCost();

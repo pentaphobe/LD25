@@ -11,7 +11,7 @@ import com.mutantamoeba.ld25.utils.RandomNumbers;
 
 public class GameEntity extends Group {	
 	TextureRegion region;
-	Room room;
+	private Room room;
 	boolean restrictToRoom = true;
 	float scale=1f, rotation=90f;
 	public GameEntity(Texture tex, int tileIndex) {
@@ -38,8 +38,8 @@ public class GameEntity extends Group {
 	}
 	public void destroy() {
 		GameWorld.instance().gameScreen().removeEntity(this);
-		if (room != null) {
-			room.removeEntity(this);
+		if (getRoom() != null) {
+			getRoom().removeEntity(this);
 		}
 	}
 	/* (non-Javadoc)
@@ -77,20 +77,32 @@ public class GameEntity extends Group {
 	
 	private boolean updateRoom(int x, int y) {
 		EntityGroup par = ((EntityGroup)this.getParent());
-		Room oldRoom = room;
-		room = GameWorld.instance().roomMap.get(x, y);
+		Room oldRoom = getRoom();
+		setRoom(GameWorld.instance().roomMap.get(x, y));
 //		Console.debug("(%d, %d) oldRoom:%s room:%s", x, y, oldRoom, room);
-		if (oldRoom != room) {
+		if (oldRoom != getRoom()) {
 //			Console.debug("changed rooms to %s [%d, %d]", room, x, y);
-			if (room == null) {
-				room = oldRoom;
+			if (getRoom() == null) {
+				setRoom(oldRoom);
 				return false;
 			}
 			if (oldRoom != null)
 				oldRoom.removeEntity(this);
-			room.addEntity(this);
+			getRoom().addEntity(this);
 		}
 		return true;
+	}
+	/**
+	 * @param room the room to set
+	 */
+	public void setRoom(Room room) {
+		this.room = room;
+	}
+	/**
+	 * @return the room
+	 */
+	public Room getRoom() {
+		return room;
 	}
 	
 }

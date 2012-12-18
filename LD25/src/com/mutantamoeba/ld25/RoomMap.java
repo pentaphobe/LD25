@@ -96,13 +96,15 @@ public class RoomMap extends ParameterMap<Room> {
 //		return makeBlankRoom(new RoomConfig(), x, y, objects);
 //	}
 	public Room makeBlankRoom(RoomConfig config, int x, int y, int objects[]) {
-		Room r = get(x, y);
-		if (r != null) {
-			// cleanup
-			r.destroy();
-			entryRooms.removeValue(r, true);
+		Room oldRoom = get(x, y);
+		Room r = new Room(config, x, y);
+		if (oldRoom != null) {
+			// cleanup			
+			r.inheritEntities(oldRoom);
+			oldRoom.destroy();
+			entryRooms.removeValue(oldRoom, true);
 		}
-		r = new Room(config, x, y);
+		
 		super.set(x, y, r);
 		int floorId = this.world.gameScreen().gameTiles.getId("floor");
 		int wallId = this.world.gameScreen().gameTiles.getId("wall");
