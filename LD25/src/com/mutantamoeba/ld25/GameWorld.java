@@ -1,6 +1,8 @@
 package com.mutantamoeba.ld25;
 
 import com.badlogic.gdx.utils.ObjectMap;
+import com.mutantamoeba.ld25.RoomTemplate.WallType;
+import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.tilemap.TileMap;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
@@ -63,6 +65,7 @@ public class GameWorld {
 		
 		tpl = addRoomTemplate("gas", 4);
 		tpl.setCosts(roomCosts);
+		tpl.setTrapEntity(WallType.OTHER, new GameEntity(gameScreen.texture, 57));
 		tpl.setObjectTiles(0, new int[] {
 			-1, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,

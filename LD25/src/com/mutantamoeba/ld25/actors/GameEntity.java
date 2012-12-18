@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25.actors;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Group;
@@ -11,9 +12,21 @@ import com.mutantamoeba.ld25.utils.RandomNumbers;
 public class GameEntity extends Group {	
 	TextureRegion region;
 	Room room;
+	public GameEntity(Texture tex, int tileIndex) {
+		super();
+		int texTileWidth = tex.getWidth() / GameScreen.TILE_SIZE;
+		int tileX = tileIndex % texTileWidth;
+		int tileY = tileIndex / texTileWidth;
+		this.region = new TextureRegion(tex, tileX, tileY, GameScreen.TILE_SIZE, GameScreen.TILE_SIZE);
+	}
 	public GameEntity(TextureRegion region) {
 		super();
 		this.region = region;
+	}
+	
+	public GameEntity(GameEntity other) {
+		super();
+		this.region = other.region;		
 	}
 	/* (non-Javadoc)
 	 * @see com.badlogic.gdx.scenes.scene2d.Actor#draw(com.badlogic.gdx.graphics.g2d.SpriteBatch, float)
@@ -32,8 +45,6 @@ public class GameEntity extends Group {
 	 */
 	@Override
 	public void act(float delta) {
-		float speed = 3f;
-		setPosition(getX() + speed * (RandomNumbers.nextFloat() - 0.5f), getY() + speed * (RandomNumbers.nextFloat() - 0.5f));
 		// TODO Auto-generated method stub
 		super.act(delta);
 	}
@@ -51,7 +62,7 @@ public class GameEntity extends Group {
 	private boolean updateRoom(int x, int y) {
 		EntityGroup par = ((EntityGroup)this.getParent());
 		Room oldRoom = room;
-		room = par.world.roomMap.get(x, y);
+		room = GameWorld.instance().roomMap.get(x, y);
 //		Console.debug("(%d, %d) oldRoom:%s room:%s", x, y, oldRoom, room);
 		if (oldRoom != room) {
 //			Console.debug("changed rooms to %s [%d, %d]", room, x, y);
@@ -59,6 +70,9 @@ public class GameEntity extends Group {
 				room = oldRoom;
 				return false;
 			}
+			if (oldRoom != null)
+				oldRoom.removeEntity(this);
+			room.addEntity(this);
 		}
 		return true;
 	}

@@ -24,6 +24,7 @@ import com.mutantamoeba.ld25.Room;
 import com.mutantamoeba.ld25.RoomCreationTool;
 import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.RoomUpgradeTool;
+import com.mutantamoeba.ld25.actors.BondEntity;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
@@ -181,6 +182,21 @@ public class GameScreen extends BasicScreen {
 		};
 		budget.setPosition(10, Gdx.graphics.getHeight() - 20);		
 		uiStage.addActor(budget);
+		
+		SimpleTextButton entityCount = new SimpleTextButton(this, "") {
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.Actor#act(float)
+			 */
+			@Override
+			public void act(float delta) {
+				setLabel(String.format("total entities: %d", entities.getChildren().size));
+				super.act(delta);
+			}
+			
+		};
+		entityCount.setPosition(10, Gdx.graphics.getHeight() - 50);
+		uiStage.addActor(entityCount);
+		
 		
 		TextureRegion region = new TextureRegion(texture, 192, 192, 64, 64);
 		NinePatch ninePatch = new NinePatch(region);
@@ -379,7 +395,7 @@ public class GameScreen extends BasicScreen {
 	public void spawnActor(float x, float y) {
 		// [@temp just adds an entity for now]
 		TextureRegion region = new TextureRegion(texture, 4 * 32, 5 * 32, 32, 32);
-		Actor actor = new GameEntity(region);	
+		Actor actor = new BondEntity(region);	
 		actor.setBounds(x, y, 32, 32);
 		actor.setOrigin(16, 0);
 		entities.addActor(actor);		
@@ -533,5 +549,13 @@ public class GameScreen extends BasicScreen {
 	 */
 	public TileRenderer getTileRenderer() {
 		return tileRenderer;
+	}
+
+	public void removeEntity(GameEntity entity) {
+		entities.removeActor(entity);
 	}		
+	public GameEntity addEntity(GameEntity entity) {
+		entities.addActor(entity);
+		return entity;
+	}
 }

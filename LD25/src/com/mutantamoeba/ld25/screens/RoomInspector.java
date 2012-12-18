@@ -69,9 +69,9 @@ public class RoomInspector extends Group {
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {
 		if (isVisible() && room != null) {
-			
-			this.ninePatch.draw(batch, getX(), getY(), getWidth(), getHeight());
 			String infoString = room.infoString();
+			setHeight(font.getMultiLineBounds(infoString).height + 60);
+			this.ninePatch.draw(batch, getX(), getY(), getWidth(), getHeight());
 			float height = font.getMultiLineBounds(infoString).height;
 			font.drawMultiLine(batch, infoString, getX() + 30, getY() + getHeight() - 25);
 		}

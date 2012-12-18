@@ -147,6 +147,7 @@ public class RoomMap extends ParameterMap<Room> {
 				}
 				if (objects != null && objects[offs] != -1) {
 					tile.layers[Tile.HAZARD_LAYER] = objects[offs];
+					r.createTrapEntity(xx, yy);
 				}
 				world.tileMap.set(tileX + xx, tileY + yy, tile);
 			}
