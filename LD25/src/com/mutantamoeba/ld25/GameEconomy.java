@@ -7,15 +7,14 @@ public class GameEconomy {
 	private float	currentBudget;
 	
 	// [@temp just a constant increase]
-	float	incomePerSecond = 100f;
+	float	incomePerSecond = 20f;
 	
 	GameEconomy() {
 		setBudget(DEFAULT_STARTING_BUDGET);
 	}
 
-	public void tick(float delta) {
-		
-		credit(incomePerSecond * delta);		
+	public void tick(float delta) {		
+		credit(incomePerSecond * GameWorld.instance().roomMap.entryRooms.size * delta);		
 	}
 	
 	public void credit(float amount) {

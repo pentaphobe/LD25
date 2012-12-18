@@ -1,6 +1,5 @@
 package com.mutantamoeba.ld25;
 
-import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.TrapEntity;
 
 public class RoomTemplate {
@@ -63,26 +62,35 @@ public class RoomTemplate {
 		return cost[level];
 	}
 	public TrapEntity createTrapEntity(int xx, int yy) {
+		TrapEntity trap = null;
 		if (xx == 0 && yy == 0 && traps[WallType.UPLEFT.val()] != null) {
-			return traps[WallType.UPLEFT.val()].clone();
+			trap = traps[WallType.UPLEFT.val()].clone();
+			trap.setLocation(WallType.UPLEFT);
 		} else if (xx == GameWorld.ROOM_SIZE-1 && yy == 0 && traps[WallType.UPRIGHT.val()] != null) {
-			return traps[WallType.UPRIGHT.val()].clone();
+			trap = traps[WallType.UPRIGHT.val()].clone();
+			trap.setLocation(WallType.UPRIGHT);
 		} else if (xx == GameWorld.ROOM_SIZE-1 && yy == GameWorld.ROOM_SIZE-1 && traps[WallType.DOWNRIGHT.val()] != null) {
-			return traps[WallType.DOWNRIGHT.val()].clone();
+			trap = traps[WallType.DOWNRIGHT.val()].clone();
+			trap.setLocation(WallType.DOWNRIGHT);
 		} else if (xx == 0 && yy == GameWorld.ROOM_SIZE-1 && traps[WallType.DOWNLEFT.val()] != null) {
-			return traps[WallType.DOWNLEFT.val()].clone();
+			trap = traps[WallType.DOWNLEFT.val()].clone();
+			trap.setLocation(WallType.DOWNLEFT);
 		} else if (xx == 0 && traps[WallType.LEFT.val()] != null) {
-			return traps[WallType.LEFT.val()].clone();
+			trap = traps[WallType.LEFT.val()].clone();
+			trap.setLocation(WallType.LEFT);
 		} else if (yy == 0 && traps[WallType.UP.val()] != null) {
-			return traps[WallType.UP.val()].clone();
+			trap = traps[WallType.UP.val()].clone();
+			trap.setLocation(WallType.UP);
 		} else if (xx == GameWorld.ROOM_SIZE-1 && traps[WallType.RIGHT.val()] != null) {
-			return traps[WallType.RIGHT.val()].clone();
+			trap = traps[WallType.RIGHT.val()].clone();
+			trap.setLocation(WallType.RIGHT);
 		} else if (yy == GameWorld.ROOM_SIZE-1 && traps[WallType.DOWN.val()] != null) {
-			return traps[WallType.DOWN.val()].clone();
+			trap = traps[WallType.DOWN.val()].clone();
+			trap.setLocation(WallType.DOWN);
 		} else if (traps[WallType.OTHER.val()] != null) {
-			return traps[WallType.OTHER.val()].clone();
+			trap = traps[WallType.OTHER.val()].clone();
+			trap.setLocation(WallType.OTHER);
 		}
-
-		return null;
+		return trap;
 	}
 }
