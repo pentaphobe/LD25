@@ -3,6 +3,7 @@ package com.mutantamoeba.ld25;
 import com.badlogic.gdx.utils.Array;
 import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.TrapEntity;
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class Room {
@@ -77,6 +78,9 @@ public class Room {
 		getEntities().add(e);
 	}
 	public void removeEntity(GameEntity e) {
+		if (e.getRoom() == this) {
+			e.setRoom(null);
+		}
 		getEntities().removeValue(e, true);
 	}
 	public void addTrapEntity(TrapEntity e) {
@@ -108,6 +112,15 @@ public class Room {
 			ent.setRoom(this);
 		}
 	}
+	public float getRelativeX(GameEntity e) {
+		float x = e.getX() - (mapX * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
+		return x;
+	}
+	public float getRelativeY(GameEntity e) {
+		float y = e.getY() - (mapY * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
+		return y;
+	}
+	
 	/**
 	 * @param entities the entities to set
 	 */
@@ -119,5 +132,25 @@ public class Room {
 	 */
 	public Array<GameEntity> getEntities() {
 		return entities;
+	}
+	public boolean isInside(GameEntity gameEntity) {
+		// ### Approach the first (relies on ParameterMap returning edge tiles instead of null for out of bounds areas)
+//		float rx = getRelativeX(gameEntity);
+//		float ry = getRelativeY(gameEntity);
+//		int roomSize = (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE);
+////		Console.debug("relative pos:%f, %f", rx, ry);
+//		return rx >= 0 && ry >= 0 && rx < roomSize && ry < roomSize;
+		
+		// ### Second approach
+		Room r = GameWorld.instance().roomMap.getRoomAt(gameEntity);
+		return r == this;
+	}
+	public Array<Room> getExits() {
+		Array<Room> exits = new Array<Room>(4);
+		if (up != null) exits.add(up);
+		if (right != null) exits.add(right);
+		if (down != null) exits.add(down);
+		if (left != null) exits.add(left);
+		return exits;
 	}
 }

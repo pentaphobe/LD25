@@ -3,14 +3,19 @@ package com.mutantamoeba.ld25.actors;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Group;
 import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.Room;
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
-import com.mutantamoeba.ld25.utils.RandomNumbers;
 
 public class GameEntity extends Group {	
-	TextureRegion region;
+	TextureRegion regions[];
+	int currentFrame = 0;
+	float frameRate = .35f;
+	float frameRateCounter = 0;
+	
 	private Room room;
 	boolean restrictToRoom = true;
 	float scale=1f, rotation=90f;
@@ -20,16 +25,40 @@ public class GameEntity extends Group {
 		int tileX = tileIndex % texTileWidth;
 		int tileY = tileIndex / texTileWidth;
 		this.setOrigin(GameScreen.TILE_SIZE / 2f, GameScreen.TILE_SIZE / 2f);
-		this.region = new TextureRegion(tex, tileX * GameScreen.TILE_SIZE, tileY * GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, GameScreen.TILE_SIZE);
+		this.regions = new TextureRegion[] {
+				new TextureRegion(tex, tileX * GameScreen.TILE_SIZE, tileY * GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, GameScreen.TILE_SIZE)		
+		};
 	}
+	public GameEntity(Texture tex, int tileIndices[]) {
+		super();
+		int texTileWidth = tex.getWidth() / GameScreen.TILE_SIZE;
+		this.setOrigin(GameScreen.TILE_SIZE / 2f, GameScreen.TILE_SIZE / 2f);
+		this.regions = new TextureRegion[tileIndices.length];
+		for (int i=0;i<tileIndices.length;i++) {
+			int tileIndex = tileIndices[i];
+			int tileX = tileIndex % texTileWidth;
+			int tileY = tileIndex / texTileWidth;
+
+			regions[i] = new TextureRegion(tex, tileX * GameScreen.TILE_SIZE, tileY * GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, GameScreen.TILE_SIZE);		
+		};
+	}
+	
 	public GameEntity(TextureRegion region) {
 		super();
-		this.region = region;
+		this.regions = new TextureRegion[] {
+				region
+		};
 		this.setOrigin(GameScreen.TILE_SIZE / 2f, GameScreen.TILE_SIZE / 2f);
 	}
+	public GameEntity(TextureRegion regions[]) {
+		super();
+		this.regions = regions;
+		this.setOrigin(GameScreen.TILE_SIZE / 2f, GameScreen.TILE_SIZE / 2f);
+	}
+	
 	public GameEntity(GameEntity other) {
 		super();
-		this.region = other.region;
+		this.regions = other.regions;
 		this.setOrigin(other.getOriginX(), other.getOriginY());
 	}
 
@@ -50,7 +79,7 @@ public class GameEntity extends Group {
 //		super.draw(batch, parentAlpha);
 		
 //		batch.draw(region, getX() - getOriginX(), getY() - getOriginY());
-		batch.draw(region, getX(), getY(), getOriginX(), getOriginY(), GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, scale, scale, rotation, true);
+		batch.draw(regions[currentFrame], getX(), getY(), getOriginX(), getOriginY(), GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, scale, scale, rotation, true);
 		
 //		batch.draw(GameScreen.texture, getX() - getWidth()/2, getY() - getHeight()/2, 32, 32, 32 /*texX*/, 40 /*texY*/, 32, 32, false, false);
 	}
@@ -60,8 +89,14 @@ public class GameEntity extends Group {
 	 */
 	@Override
 	public void act(float delta) {
-		// TODO Auto-generated method stub
 		super.act(delta);
+		if (regions.length > 1) {
+			frameRateCounter += delta;
+			if (frameRateCounter > frameRate) {
+				frameRateCounter -= frameRate;
+				currentFrame = (currentFrame + 1) % regions.length;
+			}
+		}
 	}
 
 	/* (non-Javadoc)
@@ -69,9 +104,13 @@ public class GameEntity extends Group {
 	 */
 	@Override
 	public void setPosition(float x, float y) {
+		Vector2 oldPos = new Vector2(getX(), getY());
+		super.setPosition(x, y);
 		
-		if (!restrictToRoom || updateRoom((int)(x / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)), (int)(y / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)))) {
-			super.setPosition(x, y);
+		if (!updateRoom((int)(x / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)), (int)(y / (GameWorld.ROOM_SIZE * GameScreen.TILE_SIZE)))) {
+			if (restrictToRoom) {
+				super.setPosition(oldPos.x, oldPos.y);
+			}
 		}
 	}
 	
@@ -80,15 +119,18 @@ public class GameEntity extends Group {
 		Room oldRoom = getRoom();
 		setRoom(GameWorld.instance().roomMap.get(x, y));
 //		Console.debug("(%d, %d) oldRoom:%s room:%s", x, y, oldRoom, room);
-		if (oldRoom != getRoom()) {
+		if (oldRoom != room) {
 //			Console.debug("changed rooms to %s [%d, %d]", room, x, y);
-			if (getRoom() == null) {
+			if (room == null || !room.isInside(this)) {
+				Console.debug("room:%s inside? %s", room, room == null ? "" : (room.isInside(this) ? "true" : "false"));
 				setRoom(oldRoom);
 				return false;
 			}
 			if (oldRoom != null)
 				oldRoom.removeEntity(this);
-			getRoom().addEntity(this);
+			if (room != null) {
+				getRoom().addEntity(this);
+			}
 		}
 		return true;
 	}

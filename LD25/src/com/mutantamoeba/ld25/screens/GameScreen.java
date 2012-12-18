@@ -15,6 +15,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.DragListener;
 import com.badlogic.gdx.utils.ObjectMap;
@@ -55,7 +56,7 @@ public class GameScreen extends BasicScreen {
 	public GameTileset gameTiles;
 	private EntityGroup entities;
 	public Room currentRoom;
-	SelectionBox selectionBox, toolSelectionBox;
+	SelectionBox selectionBox, toolSelectionBox, mouseHoverBox;
 	public ShaderProgram shaderProgram;
 	
 	RoomInspector roomInspector;
@@ -83,7 +84,6 @@ public class GameScreen extends BasicScreen {
 		
 //		uiStage.getCamera().combined.set
 
-		setupUI();
 		
 		particleEffect = new ParticleEffect();
 		particleEffect.load(Gdx.files.internal("data/particleEffects.p"), Gdx.files.internal("data"));
@@ -160,12 +160,23 @@ public class GameScreen extends BasicScreen {
 //				}
 //				selectRoom((int)x, (int)y);
 				Room room = world.roomMap.get(mx, my);
+				int roomSize = (TILE_SIZE * GameWorld.ROOM_SIZE);
+				mouseHoverBox.setBounds(mx * roomSize, my * roomSize, roomSize, roomSize);
+
 				if (room != null) {
-					room.mouseMoved(x - (mx * (TILE_SIZE * GameWorld.ROOM_SIZE)), y - (my * (TILE_SIZE * GameWorld.ROOM_SIZE)));
+					
+					room.mouseMoved(x - (mx * roomSize), y - (my * roomSize));					
+					mouseHoverBox.setVisible(false);
+
+				} else {
+					mouseHoverBox.setColor(1,1,1,1);
+					mouseHoverBox.setVisible(true);
+
 				}
 				return super.mouseMoved(event, x, y);
 			}			
 		});
+		roomRenderer.setZIndex(0);
 		stage.addActor(roomRenderer);
 		
 		TextureRegion region = new TextureRegion(texture, 224, 160, 32, 32);
@@ -174,6 +185,8 @@ public class GameScreen extends BasicScreen {
 		selectionBox.setZIndex(10000);
 		selectionBox.setVisible(false);
 		roomRenderer.addActor(selectionBox);
+
+		setupUI();
 
 		
 //		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
@@ -258,6 +271,12 @@ public class GameScreen extends BasicScreen {
 		toolSelectionBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
 		toolSelectionBox.setZIndex(10000);
 		uiStage.addActor(toolSelectionBox);		
+		
+		region = new TextureRegion(texture, 160, 192, 32, 32);
+		mouseHoverBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
+		mouseHoverBox.setZIndex(50000);
+		mouseHoverBox.setTouchable(Touchable.disabled);
+		roomRenderer.addActor(mouseHoverBox);
 		
 		setupTools();
 		
@@ -421,10 +440,23 @@ public class GameScreen extends BasicScreen {
 		// [@temp just adds an entity for now]
 //		TextureRegion region = new TextureRegion(texture, 4 * 32, 5 * 32, 32, 32);
 //		Actor actor = new BondEntity(region);
-		Actor actor = new BondEntity(texture, 44);
+		if (Gdx.graphics.getFramesPerSecond() < 50) {
+			Console.debug("framerate dropped at %d entities", entities.getChildren().size);
+			for (int i=0;entities.getChildren().size > 0 && i<10;i++) {
+				entities.getChildren().removeIndex(entities.getChildren().size-1);
+			}
+			return;
+		}
+		
+		BondEntity actor = new BondEntity(texture, 44, 45);
 		actor.setBounds(x, y, 32, 32);
 		actor.setOrigin(16, 0);
-		entities.addActor(actor);		
+		Room room = world.roomMap.getRoomAt(actor);
+		if (room != null) {
+			room.addEntity(actor);
+			entities.addActor(actor);	
+		}
+			
 	}
 	
 	public void update(float delta) {
@@ -508,11 +540,14 @@ public class GameScreen extends BasicScreen {
 		case '3':
 			roomRenderer.setVisible(!roomRenderer.isVisible());
 			break;
-		case 'p':
+		case 'p':	// Pay me
 				getWorld().getEconomy().credit(100000);
 				break;
-		case 'l':
+		case 'l':	// Lines / Debug
 				LD25.DEBUG_MODE = false;
+				return true;
+		case 'r':	// raid
+				getWorld().getSpawner().setSpawnFrequency(getWorld().getSpawner().getSpawnFrequency() * .25f);
 				return true;
 		case ' ':
 			Console.debug("PAUSING");

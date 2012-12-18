@@ -36,13 +36,13 @@ public class GameWorld {
 		tileMap = new TileMap(this, this.tileMapWidth, this.tileMapHeight);
 		
 		economy = new GameEconomy();
-		spawner = new GameBondSpawner(this, 1);
+		setSpawner(new GameBondSpawner(this, 4));
 		createRoomTemplates();
 	}
 
 	public void tick(float delta) {
 		economy.tick(delta);
-		spawner.tick(delta);
+		getSpawner().tick(delta);
 	}
 	
 	public RoomTemplate addRoomTemplate(String name, int maxLevel) {
@@ -242,5 +242,19 @@ public class GameWorld {
 			return roomMap.entryRooms.get(RandomNumbers.nextInt(roomMap.entryRooms.size));
 		}
 		return null;
+	}
+
+	/**
+	 * @param spawner the spawner to set
+	 */
+	public void setSpawner(GameBondSpawner spawner) {
+		this.spawner = spawner;
+	}
+
+	/**
+	 * @return the spawner
+	 */
+	public GameBondSpawner getSpawner() {
+		return spawner;
 	}
 }

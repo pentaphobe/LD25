@@ -1,7 +1,10 @@
 package com.mutantamoeba.ld25;
 
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.engine.Console;
+import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.tilemap.Tile;
 import com.mutantamoeba.ld25.utils.ParameterMap;
 
@@ -220,45 +223,59 @@ public class RoomMap extends ParameterMap<Room> {
 		Room right = get(x+1, y);
 		Room up = get(x, y-1);
 		Room down = get(x, y+1);
-		me.up = up;
-		me.down = down;
-		me.left = left;
-		me.right = right;
+		
+		// I wrote ParameterMap<?>.get() to not return null, in this case we want null. 
+		me.up = up == me ? null : up;
+		me.down = down == me ? null : down;
+		me.left = left == me ? null : left;
+		me.right = right == me ? null : right;
 		
 		int wallId = this.world.gameScreen().gameTiles.getId("wall");
 		int wallIndices[] = this.world.gameScreen().gameTiles.getTileIndices(wallId);
 		// the second line in each of these assignments looks weird because it's defined
 		// in terms of the target room ("me") just for clarity of reading 
 		// (one might argue that if it was so clear, no explanation would be needed)
-		if (up != null) {
+		if (me.up != null) {
 			setRoomTile(me, 2, 0, Tile.WALL_LAYER, -1);
 			setRoomTile(me, 2, -1, Tile.WALL_LAYER, -1);
+			me.up.down = me;
 		} else {
 			setRoomTile(me, 2, 0, Tile.WALL_LAYER, wallIndices[1]);
-			setRoomTile(me, 2, -1, Tile.WALL_LAYER, -1);
+			setRoomTile(me, 2, -1, Tile.WALL_LAYER, -1);			
 		}
-		if (down != null) {
+		if (me.down != null) {
 			setRoomTile(me, 2, 4, Tile.WALL_LAYER, -1);
 			setRoomTile(me, 2, 5, Tile.WALL_LAYER, -1);
+			me.down.up = me;
 		}else {
 			setRoomTile(me, 2, 4, Tile.WALL_LAYER, wallIndices[7]);
 			setRoomTile(me, 2, 5, Tile.WALL_LAYER, -1);
 		}
-		if (left != null) {
+		if (me.left != null) {
 			setRoomTile(me, 0, 2, Tile.WALL_LAYER, -1);
 			setRoomTile(me, -1, 2, Tile.WALL_LAYER, -1);
+			me.left.right = me;
 		}else {
 			setRoomTile(me, 0, 2, Tile.WALL_LAYER, wallIndices[3]);
 			setRoomTile(me, -1, 2, Tile.WALL_LAYER, -1);
 		}
-		if (right != null) {
+		if (me.right != null) {
 			setRoomTile(me, 4, 2, Tile.WALL_LAYER, -1);
 			setRoomTile(me, 5, 2, Tile.WALL_LAYER, -1);
+			me.right.left = me;
 		}else {
 			setRoomTile(me, 4, 2, Tile.WALL_LAYER, wallIndices[5]);
 			setRoomTile(me, 5, 2, Tile.WALL_LAYER, -1);
 		}
 //		Console.debug("   after: %s", me);
 	
+	}
+	
+	public Room getRoomAt(GameEntity e) {
+		Vector2 pos = new Vector2(e.getX(), e.getY());
+		pos.div(GameScreen.TILE_SIZE * GameWorld.ROOM_SIZE);
+		int mx = (int)pos.x;
+		int my = (int)pos.y;
+		return get(mx, my);
 	}
 }
