@@ -19,9 +19,13 @@ public abstract class GameTool {
 		gameScreen.getWorld().getEconomy().debit(val);
 	}
 	public boolean canApply() {
-		return gameScreen.getWorld().getEconomy().budget() >= getCost();
+		return canApply(cost);
 	}
 	public boolean canApply(float dynamicCost) {
+		if (gameScreen.selfDestructRoom == null & gameScreen.getWorld().getEconomy().budget() < dynamicCost + GameScreen.TOOL_DESTRUCT_COST) {
+			GameScreen.instance().sounds.trigger("beep", 0.5f);
+			return false;
+		}
 		return gameScreen.getWorld().getEconomy().budget() >= dynamicCost;
 	}	
 	

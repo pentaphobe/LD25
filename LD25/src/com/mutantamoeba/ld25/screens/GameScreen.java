@@ -51,6 +51,8 @@ public class GameScreen extends BasicScreen {
 	static final float SCROLL_SPEED = 200f; // pixels per second
 	static final float SCROLL_FAST_MULTIPLIER = 3f; // how much faster than SCROLL_SPEED do we go in fast mode?
 	private static final float SIDEPANEL_WIDTH = 90;
+	public static final float TOOL_DESTRUCT_COST = 100;
+	private static final float TOOL_REMOVE_COST = 200;
 	
 	
 	public Texture texture;
@@ -216,10 +218,19 @@ public class GameScreen extends BasicScreen {
 //					Console.debug("MOVEMOUSE");
 					room.mouseMoved(event.getStageX() - (mx * roomSize), event.getStageY() - (my * roomSize));					
 					mouseHoverBox.setVisible(false);
-					if (currentTool != null && currentTool.getName().equals("upgrade")) {
-						toolTipBox.setLabel(String.format("upgrade £%.0f", room.config().getUpgradeCost()));
-						toolTipBox.setPosition(event.getStageX(), event.getStageY());
-						toolTipBox.setVisible(true);
+					if (currentTool != null) {
+						if (currentTool.getName().equals("upgrade")) {
+							// show upgrade cost
+							toolTipBox.setLabel(String.format("upgrade &%.0f", room.config().getUpgradeCost()));
+							toolTipBox.setPosition(event.getStageX(), event.getStageY());
+							toolTipBox.setVisible(true);
+						} else if (room.config().template().getName().equals("basic") && !currentTool.getName().equals("basic")) {
+							// show auto-upgrade BASIC rooms to weaponised rooms
+							toolTipBox.setLabel(String.format("%s &%.0f", currentTool.getName(), currentTool.getCost()));
+							toolTipBox.setPosition(event.getStageX(), event.getStageY());
+							toolTipBox.setVisible(true);
+							
+						}
 					} else {
 						toolTipBox.setVisible(false);
 					}
@@ -261,6 +272,7 @@ public class GameScreen extends BasicScreen {
 		sounds.loadSound("alarm", "sounds/alarm.wav");
 		sounds.loadSound("explosion", "sounds/explosion.wav");
 		sounds.loadSound("fanfare", "sounds/fanfare.wav");
+		sounds.loadSound("beep", "sounds/beep.wav");
 
 	}
 
@@ -299,7 +311,7 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void act(float delta) {
-				setLabel(String.format("budget: £%.0f", getWorld().getEconomy().budget()));
+				setLabel(String.format("budget: &%.0f", getWorld().getEconomy().budget()));
 				super.act(delta);
 			}
 			
@@ -397,9 +409,9 @@ public class GameScreen extends BasicScreen {
 				if (toolButton.isEnabled()) {
 					event.cancel();
 					String toolName = toolButton.toolName;
-					
+					Console.debug("button:%s, currentTool name:%s", toolName, currentTool == null ? "null" : currentTool.getName());
 					if (currentTool != null && toolName.equals(currentTool.getName())) {
-						currentTool = null;
+						deselectTool();
 						return;
 					}
 					
@@ -424,9 +436,9 @@ public class GameScreen extends BasicScreen {
 					GameTool tool = getTool(button.getToolName());
 					int cost = (int)tool.getCost(); 
 					if (cost > 0) {
-						tipText = tipText + String.format(" £%d", cost);
+						tipText = tipText + String.format(" &%d", cost);
 					} else {
-						tipText = tipText + " £(depends on room)";
+						tipText = tipText + " &(depends on room)";
 					}
 					getToolTipBox().setLabel( tipText);
 					getToolTipBox().setVisible(true);
@@ -517,8 +529,13 @@ public class GameScreen extends BasicScreen {
 		uiStage.addActor(getToolTipBox());
 		
 	}
+	protected void deselectTool() {
+		currentTool = null;
+		toolSelectionBox.setVisible(false);
+	}
+
 	public void setupTools() {
-		GameTool tool = new GameTool("remove", this, 200) {
+		GameTool tool = new GameTool("remove", this, TOOL_REMOVE_COST) {
 			@Override
 			public boolean apply(int mx, int my) {
 				Room r = getWorld().roomMap.get(mx, my);
@@ -537,7 +554,7 @@ public class GameScreen extends BasicScreen {
 		};
 		tools.put(tool.getName(), tool);
 		
-		tool = new GameTool("destruct", this, 100) {
+		tool = new GameTool("destruct", this, TOOL_DESTRUCT_COST) {
 			@Override
 			public boolean apply(int mx, int my) {
 				Room r = getWorld().roomMap.get(mx, my);
@@ -602,7 +619,8 @@ public class GameScreen extends BasicScreen {
 	public void selectTool(String toolName) {
 		GameTool tool = getTool(toolName);
 		if (tool != null) {
-			currentTool = tool;			
+			currentTool = tool;
+			toolSelectionBox.setVisible(true);
 		}
 	}
 
