@@ -19,7 +19,7 @@ public class GameWorld {
 	
 	public static final int ROOM_SIZE = 5;
 
-	public static final float SECRET_LAIR_INITIAL_HEALTH = 100;
+	public static final float SECRET_LAIR_INITIAL_HEALTH = 500;
 	public int mapWidth, mapHeight;
 	public int tileMapWidth, tileMapHeight;
 
@@ -45,7 +45,7 @@ public class GameWorld {
 		tileMap = new TileMap(this, this.tileMapWidth, this.tileMapHeight);
 		
 		economy = new GameEconomy();
-		setSpawner(new GameBondSpawner(this, 4));
+		setSpawner(new GameBondSpawner(this, 8));
 		createRoomTemplates();
 	}
 

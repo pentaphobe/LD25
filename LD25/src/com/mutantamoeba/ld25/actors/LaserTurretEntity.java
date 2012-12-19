@@ -11,7 +11,7 @@ import com.mutantamoeba.ld25.utils.RandomNumbers;
 
 public class LaserTurretEntity extends TrapEntity {
 	private static final float SPAWN_RANDOM_POS = 0;
-	private static final float LASER_DAMAGE = 64f;
+	private static final float LASER_DAMAGE = 48f;
 	private static final float LASER_LINE_DISTANCE = 24;
 	float mouseDistance = 1;
 	Vector2 mousePos = new Vector2();

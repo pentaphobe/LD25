@@ -9,7 +9,7 @@ import com.mutantamoeba.ld25.utils.RandomNumbers;
 public class GasVentEntity extends TrapEntity {
 
 	private static final float SPAWN_RANDOM_POS = 4f;
-	private static final float POISON_DAMAGE = 3.5f;
+	private static final float POISON_DAMAGE = 5.5f;
 
 	public GasVentEntity(Texture tex, int tileIndex) {
 		super(tex, tileIndex);

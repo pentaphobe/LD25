@@ -2,8 +2,7 @@ package com.mutantamoeba.ld25.screens;
 
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
-
-import static com.badlogic.gdx.scenes.scene2d.actions.Actions.*;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.mutantamoeba.ld25.LD25;
@@ -11,9 +10,13 @@ import com.mutantamoeba.ld25.actors.SimpleTextButton;
 import com.mutantamoeba.ld25.engine.Console;
 
 public class MainMenuScreen extends BasicScreen {
+	Music music;
 	public MainMenuScreen(Game game) {
 		super(game);
 		
+		music = Gdx.audio.newMusic(Gdx.files.local("sounds/intro_music.wav"));
+		music.setLooping(true);
+		music.play();
 		
 		SimpleTextButton butt = new SimpleTextButton(this, "> press anything to start <");
 		stage.addActor(butt);
@@ -28,7 +31,7 @@ public class MainMenuScreen extends BasicScreen {
 			public void clicked(InputEvent event, float x, float y) {
 				Console.debug("%s clicked at %f, %f", this, x, y);
 				super.clicked(event, x, y);
-				LD25.instance().setScreen(new GameScreen(LD25.instance()));
+				startGame();
 			}
 			
 			
@@ -40,8 +43,23 @@ public class MainMenuScreen extends BasicScreen {
 	 */
 	@Override
 	public boolean keyDown(int keycode) {
-		LD25.instance().setScreen(new GameScreen(LD25.instance()));
+		startGame();
 		
 		return super.keyDown(keycode);
+	}
+	
+	public void startGame() {
+		music.setLooping(false);
+		music.setVolume(0f);
+		music.stop();
+
+		LD25.instance().setScreen(new GameScreen(LD25.instance()));
+		
+	}
+
+	@Override
+	public void dispose() {
+		music.dispose();
+		super.dispose();
 	}
 }

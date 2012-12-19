@@ -252,6 +252,8 @@ public class GameScreen extends BasicScreen {
 		sounds.loadSound("laser", "sounds/laser.wav");
 		sounds.loadSound("alarm", "sounds/alarm.wav");
 		sounds.loadSound("explosion", "sounds/explosion.wav");
+		sounds.loadSound("fanfare", "sounds/fanfare.wav");
+
 	}
 
 	private void setupPreferences() {
@@ -800,6 +802,9 @@ public class GameScreen extends BasicScreen {
 				dispose();
 
 				LD25.instance().setScreen(new MainMenuScreen(game));
+				break;
+		case '\\':
+				getWorld().getSpawner().waveCounter = getWorld().getSpawner().waveFrequency;
 				break;
 		case ' ':
 			Console.debug("PAUSING");
