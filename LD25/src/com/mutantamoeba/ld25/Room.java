@@ -1,6 +1,7 @@
 package com.mutantamoeba.ld25;
 
 import com.badlogic.gdx.utils.Array;
+import com.mutantamoeba.ld25.actors.BondEntity;
 import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.GasEntity;
 import com.mutantamoeba.ld25.actors.TrapEntity;
@@ -162,6 +163,14 @@ public class Room {
 	 */
 	public Array<GameEntity> getEntities() {
 		return entities;
+	}
+	public boolean hasBonds() {
+		for (GameEntity entity:getEntities()) {
+			if (entity instanceof BondEntity && ((BondEntity)entity).isAlive()) {				
+				return true;
+			}
+		}		
+		return false;
 	}
 	public boolean isInside(GameEntity gameEntity) {
 		// ### Approach the first (relies on ParameterMap returning edge tiles instead of null for out of bounds areas)

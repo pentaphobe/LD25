@@ -28,6 +28,7 @@ import com.mutantamoeba.ld25.RoomRenderer;
 import com.mutantamoeba.ld25.RoomUpgradeTool;
 import com.mutantamoeba.ld25.SoundWrapper;
 import com.mutantamoeba.ld25.actors.BondEntity;
+import com.mutantamoeba.ld25.actors.DestructButtonEntity;
 import com.mutantamoeba.ld25.actors.EntityGroup;
 import com.mutantamoeba.ld25.actors.FpsCounter;
 import com.mutantamoeba.ld25.actors.GameEntity;
@@ -61,7 +62,7 @@ public class GameScreen extends BasicScreen {
 	private EntityGroup entities;
 	public Room currentRoom;
 	public Room selfDestructRoom;
-	public GameEntity selfDestructButton;
+	public DestructButtonEntity selfDestructButton;
 	SelectionBox selectionBox, toolSelectionBox, mouseHoverBox;
 	private TextBox toolTipBox;
 	public ShaderProgram shaderProgram;
@@ -82,6 +83,7 @@ public class GameScreen extends BasicScreen {
 		sounds.loadSound("gas", "sounds/gas.wav");
 		sounds.loadSound("trapdoor", "sounds/trapdoor.wav");
 		sounds.loadSound("laser", "sounds/laser.wav");
+		sounds.loadSound("alarm", "sounds/alarm.wav");
 		
 		texture = new Texture("data/tiles.png");
 		texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
@@ -369,7 +371,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("remove a room");
-		butt.setHotkey('`');
+		butt.setHotkey('0');
 		sidePanel.addActor(butt);
 				
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 64, 32, 32), "upgrade");
@@ -411,13 +413,21 @@ public class GameScreen extends BasicScreen {
 		butt.setToolTip("trapdoor room");
 		butt.setHotkey('2');
 		sidePanel.addActor(butt);
-
+		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 64, 32, 32), "basic");
 		butt.setBounds(10, 414, 64, 64);
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("basic room");
 		butt.setHotkey('1');
+		sidePanel.addActor(butt);				
+
+		butt = new ToolButton(buttRegions, new TextureRegion(texture, 128, 192, 32, 32), "destruct");
+		butt.setBounds(10, 478, 64, 64);
+		butt.addListener(toolSelectCallback);
+		butt.addListener(toolTipCallback);
+		butt.setToolTip("place/move self-destruct button");
+		butt.setHotkey('`');
 		sidePanel.addActor(butt);		
 		
 		setToolTipBox(new TextBox(this, "tooltip"));
@@ -444,6 +454,39 @@ public class GameScreen extends BasicScreen {
 			
 		};
 		tools.put(tool.getName(), tool);
+		
+		tool = new GameTool("destruct", this, 100) {
+			@Override
+			public boolean apply(int mx, int my) {
+				Room r = getWorld().roomMap.get(mx, my);
+
+				if (canApply() && r != null) {
+					if (selfDestructButton == null) {
+						selfDestructButton = new DestructButtonEntity();
+						stage.addActor(selfDestructButton);
+					} else if (selfDestructRoom != null) {
+						if (selfDestructRoom == r) {
+							// don't let people waste money moving the button to the same place
+							return true;
+						}
+						if ( !("basic".equals(r.config().template().getName())) ) {
+							// don't let people place their buttons in trapped rooms
+							return true;
+						}
+						selfDestructRoom.removeEntity(selfDestructButton);
+					}
+					selfDestructRoom = r;
+					selfDestructButton.setRoom(r);
+					selfDestructButton.setPosition((mx+0.5f)*(GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE), (my+0.5f)*(GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE)); 
+					selfDestructRoom.addEntity(selfDestructButton);
+					applyCost();
+					return true;
+				}
+				return false;
+			}
+			
+		};
+		tools.put(tool.getName(), tool);		
 	
 		tool = new RoomCreationTool("basic", this);
 		tools.put(tool.getName(), tool);			

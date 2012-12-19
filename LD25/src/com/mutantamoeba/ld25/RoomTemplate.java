@@ -93,4 +93,10 @@ public class RoomTemplate {
 		}
 		return trap;
 	}
+	public String getName() {
+		return name;
+	}
+	public void setName(String name) {
+		this.name = name;
+	}
 }

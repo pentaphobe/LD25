@@ -143,7 +143,7 @@ public class BondEntity extends GameEntity {
 		
 	}
 
-	private boolean isAlive() {		
+	public boolean isAlive() {		
 		return health > 0;
 	}
 

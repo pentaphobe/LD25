@@ -109,7 +109,7 @@ public class MathUtils {
 		final float lineLenX = lineX2 - lineX1;
 		final float lineLenY = lineY2 - lineY2;
 		final float l2 = (lineLenX*lineLenX)+(lineLenY*lineLenY);
-		if (l2 == 0.0) return distance(x, y, lineX1, lineY1);
+		if (l2 == 0.0F) return distance(x, y, lineX1, lineY1);
 		final float t = dot(x-lineX1, y-lineY1, lineLenX, lineLenY) / l2;
 		if (t < 0.0f) 
 			return distance(x, y, lineX1, lineY1);
