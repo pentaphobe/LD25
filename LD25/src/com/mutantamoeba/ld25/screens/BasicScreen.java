@@ -47,14 +47,16 @@ public abstract class BasicScreen extends AbstractScreen {
 	
 	@Override
 	public void render(float delta) {	
+		update(delta);
+
+		preGameRender(stage.getSpriteBatch());
+
 		if (clearScreen) {
 			Gdx.gl.glClearColor(0,0,0,1);
 			Gdx.gl.glClear(GL10.GL_COLOR_BUFFER_BIT);
 		}
 		
-		update(delta);
 		
-		preGameRender(stage.getSpriteBatch());
 		stage.draw();
 		postGameRender(stage.getSpriteBatch());
 		preUiRender(uiStage.getSpriteBatch());

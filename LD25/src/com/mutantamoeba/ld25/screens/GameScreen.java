@@ -128,6 +128,7 @@ public class GameScreen extends BasicScreen {
 			shaderProgram = createShader();
 			originalShaderProgram = SpriteBatch.createDefaultShader();
 			stage.getSpriteBatch().setShader(originalShaderProgram);
+			setClearScreen(true);
 //			tileRenderer.setShader(sp);
 		}
 		
@@ -552,7 +553,11 @@ public class GameScreen extends BasicScreen {
 			public boolean apply(int mx, int my) {
 				Room r = getWorld().roomMap.get(mx, my);
 
-				if (canApply() && r != null && r != selfDestructRoom) {
+				if (canApply() && r != null) {
+					if (r == selfDestructRoom || r.getEntities().size != 0) {
+						sounds.trigger("beep", 0.5f);
+						return false;
+					}
 					deselectRoom();					
 					r.destroy();
 					getWorld().roomMap.remove(mx, my);
