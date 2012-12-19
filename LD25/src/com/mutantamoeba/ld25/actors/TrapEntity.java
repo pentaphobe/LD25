@@ -68,6 +68,10 @@ public class TrapEntity extends GameEntity {
 		// TODO Auto-generated method stub
 		
 	}
+	
+	public float timeRemaining() {
+		return resetTime - resetCounter;
+	}
 
 	public void activate() {
 //		Console.debug("trap entity:%s's room:%s", this, getRoom());

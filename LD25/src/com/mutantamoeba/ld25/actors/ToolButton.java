@@ -13,6 +13,7 @@ public class ToolButton extends SimpleButton {
 	TextureRegion icon;
 	public String toolName;
 	boolean enabled;
+	private char hotKey;
 	public ToolButton(TextureRegion background[], TextureRegion icon, String toolName) {
 		super();
 		this.toolName = toolName;
@@ -52,6 +53,16 @@ public class ToolButton extends SimpleButton {
 	}
 	public void setToolName(String toolName) {
 		this.toolName = toolName;
+	}
+	public void setHotkey(char key) {
+		this.hotKey = key;
+	}
+	public char getHotKey() {
+		return this.hotKey;
+	}
+	@Override
+	public String getToolTip() { 
+		return super.getToolTip() + "[" + this.hotKey + "]";
 	}
 
 }

@@ -3,12 +3,16 @@ package com.mutantamoeba.ld25.actors;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.mutantamoeba.ld25.Room;
+import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.utils.MathUtils;
 import com.mutantamoeba.ld25.utils.RandomNumbers;
 
 public class LaserTurretEntity extends TrapEntity {
 	private static final float SPAWN_RANDOM_POS = 0;
+	private static final float LASER_DAMAGE = 64f;
+	private static final float LASER_LINE_DISTANCE = 24;
 	float mouseDistance = 1;
 	Vector2 mousePos = new Vector2();
 	boolean gotMouse=false;
@@ -94,6 +98,28 @@ public class LaserTurretEntity extends TrapEntity {
 //		}
 		rotation += MathUtils.dirDelta(rotation, targetRotation, 180) * 0.25f;
 		super.act(delta);
+		
+		if (isActivated()) {
+			// check intersection with entities
+			float startX = getX();
+			float startY = getY();
+			float endX = startX + mousePos.x;
+			float endY = startY + mousePos.y;
+			Room room = getRoom();
+//			Console.debug("laser line is from %f, %f to %f, %f", startX, startY, endX, endY);
+			for (GameEntity ent:room.getEntities()) {
+				if (ent instanceof BondEntity) {
+					BondEntity bond = (BondEntity)ent;
+					float bondX = bond.getX();//room.getRelativeX(bond);
+					float bondY = bond.getY(); //room.getRelativeY(bond);
+					float distanceToLine = MathUtils.distanceToLine(bondX, bondY, startX, startY, endX, endY);
+//					Console.debug("distance to %f, %f: %f", bondX, bondY, distanceToLine);
+					if (distanceToLine <= LASER_LINE_DISTANCE) {
+						bond.hurt(LASER_DAMAGE * delta);
+					}
+				}
+			}
+		}
 	}
 	
 }

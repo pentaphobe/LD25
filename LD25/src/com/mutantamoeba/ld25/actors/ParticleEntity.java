@@ -34,6 +34,8 @@ public class ParticleEntity extends GameEntity {
 		ageCounter += delta;
 		if (ageCounter > maxAge / 2f) {
 			setColor(1f, 1f, 1f, MathUtils.map(ageCounter, maxAge/2f, maxAge, 1, 0));
+		} else {
+			setColor(1f, 1f, 1f, 1f);
 		}
 		if (ageCounter > maxAge) {
 //			Console.debug("Destroying");

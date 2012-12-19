@@ -134,13 +134,21 @@ public class Room {
 			ent.setRoom(this);
 		}
 	}
-	public float getRelativeX(GameEntity e) {
-		float x = e.getX() - (getMapX() * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
+	
+	public float getRelativeX(float wx) {
+		float x = wx - (getMapX() * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
 		return x;
 	}
-	public float getRelativeY(GameEntity e) {
-		float y = e.getY() - (getMapY() * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
+	public float getRelativeY(float wy) {
+		float y = wy - (getMapY() * (GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE));
 		return y;
+	}
+	
+	public float getRelativeX(GameEntity e) {
+		return getRelativeX(e.getX());
+	}
+	public float getRelativeY(GameEntity e) {		
+		return getRelativeY(e.getY());
 	}
 	
 	/**

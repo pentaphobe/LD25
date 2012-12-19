@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25.actors;
 
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -82,9 +83,14 @@ public class GameEntity extends Group {
 	public void draw(SpriteBatch batch, float parentAlpha) {
 //		super.draw(batch, parentAlpha);
 		
-//		batch.draw(region, getX() - getOriginX(), getY() - getOriginY());		
-		batch.draw(regions[currentFrame], getX(), getY(), getOriginX(), getOriginY(), GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, scale, flipX?-1:1 * scale, rotation, true);
+//		batch.draw(region, getX() - getOriginX(), getY() - getOriginY());
+		Color oldColor = batch.getColor();
 		
+		Color entityColor = getColor();
+		batch.setColor(entityColor.r, entityColor.g, entityColor.b, entityColor.a * parentAlpha);
+		
+		batch.draw(regions[currentFrame], getX(), getY(), getOriginX(), getOriginY(), GameScreen.TILE_SIZE, GameScreen.TILE_SIZE, scale, flipX?-1:1 * scale, rotation, true);
+		batch.setColor(oldColor);
 //		batch.draw(GameScreen.texture, getX() - getWidth()/2, getY() - getHeight()/2, 32, 32, 32 /*texX*/, 40 /*texY*/, 32, 32, false, false);
 	}
 

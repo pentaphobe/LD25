@@ -60,6 +60,8 @@ public class GameScreen extends BasicScreen {
 	public GameTileset gameTiles;
 	private EntityGroup entities;
 	public Room currentRoom;
+	public Room selfDestructRoom;
+	public GameEntity selfDestructButton;
 	SelectionBox selectionBox, toolSelectionBox, mouseHoverBox;
 	private TextBox toolTipBox;
 	public ShaderProgram shaderProgram;
@@ -117,12 +119,12 @@ public class GameScreen extends BasicScreen {
 		stage.addActor(this.entities);		
 		
 		roomRenderer = new RoomRenderer(getWorld());
-		roomRenderer.addListener(new ClickListener() {
+		roomRenderer.addListener(new InputListener() {
 			/* (non-Javadoc)
 			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
 			 */
 			@Override
-			public void clicked(InputEvent event, float x, float y) {				
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {				
 				float rx = x / (TILE_SIZE * GameWorld.ROOM_SIZE);
 				float ry = y / (TILE_SIZE * GameWorld.ROOM_SIZE);
 
@@ -131,12 +133,12 @@ public class GameScreen extends BasicScreen {
 //					world.roomMap.makeTemplatedRoom((int)rx, (int)ry);				
 //					tileRenderer.updateFromMap();
 //				}					
-//				selectRoom((int)rx, (int)ry);
+				selectRoom((int)rx, (int)ry);
 				if (currentTool != null) {
 					currentTool.apply((int)rx, (int)ry);
 				}
 				
-				super.clicked(event, x, y);
+				return super.touchDown(event, x, y, pointer, button);
 			}			
 		});
 		roomRenderer.addListener(new DragListener() {
@@ -153,7 +155,14 @@ public class GameScreen extends BasicScreen {
 //					world.roomMap.makeTemplatedRoom((int)x, (int)y);
 //					tileRenderer.updateFromMap();
 //				}
-//				selectRoom((int)x, (int)y);
+				Room r = world.roomMap.get((int)mx, (int)my);
+				
+				// to prevent drag from deselecting the room (currently the UI assumes repeated selections to be a deselect) 
+				if (r != currentRoom) {
+					Console.debug("drag changing selection (old:%s, new:%s)", currentRoom, r);
+					selectRoom(mx, my);
+				}
+				
 				if (currentTool == null || !currentTool.apply((int)x, (int)y)) {
 //					Console.debug("DRAG MOVEMOUSE");
 					Room room = world.roomMap.get(mx, my);
@@ -333,7 +342,7 @@ public class GameScreen extends BasicScreen {
 					if (cost > 0) {
 						tipText = tipText + String.format(" $%d", cost);
 					} else {
-						tipText = tipText + "$depends on room";
+						tipText = tipText + " $(depends on room)";
 					}
 					getToolTipBox().setLabel( tipText);
 					getToolTipBox().setVisible(true);
@@ -360,6 +369,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("remove a room");
+		butt.setHotkey('`');
 		sidePanel.addActor(butt);
 				
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 64, 32, 32), "upgrade");
@@ -367,6 +377,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("upgrade a room");
+		butt.setHotkey('6');
 		sidePanel.addActor(butt);		
 
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 96, 32, 32), "gas");
@@ -374,6 +385,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("gas chamber");
+		butt.setHotkey('5');
 		sidePanel.addActor(butt);
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 192, 96, 32, 32), "laser");
@@ -381,6 +393,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("laser turret room");
+		butt.setHotkey('4');
 		sidePanel.addActor(butt);		
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 224, 96, 32, 32), "dart");
@@ -388,6 +401,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("poison dart room");
+		butt.setHotkey('3');
 		sidePanel.addActor(butt);		
 		
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 192, 64, 32, 32), "trapdoor");
@@ -395,6 +409,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("trapdoor room");
+		butt.setHotkey('2');
 		sidePanel.addActor(butt);
 
 		butt = new ToolButton(buttRegions, new TextureRegion(texture, 160, 64, 32, 32), "basic");
@@ -402,6 +417,7 @@ public class GameScreen extends BasicScreen {
 		butt.addListener(toolSelectCallback);
 		butt.addListener(toolTipCallback);
 		butt.setToolTip("basic room");
+		butt.setHotkey('1');
 		sidePanel.addActor(butt);		
 		
 		setToolTipBox(new TextBox(this, "tooltip"));
@@ -413,13 +429,14 @@ public class GameScreen extends BasicScreen {
 		GameTool tool = new GameTool("remove", this, 200) {
 			@Override
 			public boolean apply(int mx, int my) {
-				if (canApply()) {
-					Room r = getWorld().roomMap.get(mx, my);
+				Room r = getWorld().roomMap.get(mx, my);
+
+				if (canApply() && r != null) {
+					deselectRoom();					
 					r.destroy();
 					getWorld().roomMap.remove(mx, my);
 					getTileRenderer().updateFromMap();
 					applyCost();
-					deselectRoom();
 					return true;
 				}
 				return false;
@@ -458,7 +475,7 @@ public class GameScreen extends BasicScreen {
 	public void selectTool(String toolName) {
 		GameTool tool = getTool(toolName);
 		if (tool != null) {
-			currentTool = tool;
+			currentTool = tool;			
 		}
 	}
 
@@ -506,6 +523,9 @@ public class GameScreen extends BasicScreen {
 		roomInspector.setVisible(false);
 	}
 	public void selectRoom(int rx, int ry) {
+		if (rx < 0 || ry < 0 || rx >= getWorld().roomMap._w-1 || ry >= getWorld().roomMap._h-1) {
+			return;
+		}
 		Room oldSelection = currentRoom;
 		currentRoom = getWorld().roomMap.get(rx, ry);		
 		
@@ -643,12 +663,12 @@ public class GameScreen extends BasicScreen {
 	@Override
 	public boolean keyTyped(char character) {
 		switch (character) {
-		case '2':
-				getTileRenderer().setVisible(!getTileRenderer().isVisible());
-				break;
-		case '3':
-			roomRenderer.setVisible(!roomRenderer.isVisible());
-			break;
+//		case '2':
+//				getTileRenderer().setVisible(!getTileRenderer().isVisible());
+//				break;
+//		case '3':
+//			roomRenderer.setVisible(!roomRenderer.isVisible());
+//			break;
 		case 'p':	// Pay me
 				getWorld().getEconomy().credit(100000);
 				break;
@@ -671,9 +691,23 @@ public class GameScreen extends BasicScreen {
 			Console.debug("PAUSING");
 			togglePaused();
 			return true;
-			
+		default:
+			selectToolByKey(character);
 		}
 		return super.keyTyped(character);
+	}
+
+	private void selectToolByKey(char character) {
+		for (Actor butt:sidePanel.getChildren()) {
+			if (butt instanceof ToolButton) {
+				ToolButton tb = (ToolButton)butt;
+				if (tb.getHotKey() == character) {
+					toolSelectionBox.setBounds(tb.getX(), tb.getY(), tb.getWidth(), tb.getHeight());
+					selectTool(tb.getToolName());
+				}
+			}
+		}
+		
 	}
 
 	/**

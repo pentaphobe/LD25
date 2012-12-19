@@ -21,7 +21,8 @@ public class BondEntity extends GameEntity {
 	private static final float MAX_WAYPOINT_PROXIMITY = 2f;
 	private static final float MIN_WAYPOINT_PROXIMITY = .5f;
 	private static final int MEMORY_LENGTH = 12;
-	public static float speed = 120f;
+	private static final float DESTRUCTION_HEALTH = -10f;
+	public static float speed = 60f;
 	private float health;
 	
 	// switching to standard linked list since PooledLinkedList doesn't keep track of its size (!?)
@@ -62,13 +63,17 @@ public class BondEntity extends GameEntity {
 //			float speed = 6f;
 //			setPosition(getX() + speed * (RandomNumbers.nextFloat() - 0.5f), getY() + speed * (RandomNumbers.nextFloat() - 0.5f));
 			Vector2 move = new Vector2(waypoint).sub(getX(), getY());
+			float roomMidpoint = (GameScreen.HTILE_SIZE * GameWorld.ROOM_SIZE);
 			float dist = (float)MathUtils.sqrt(move.x*move.x + move.y*move.y);
 			
 			if (dist > desiredProximity) {
 				move.nor();
 				flipX = move.x < 0;
 				move.mul(speed);
-				setPosition(getX() + move.x * delta, getY() + move.y * delta);
+				float xPos = getX() + move.x * delta;
+				float yPos = getY() + move.y * delta;
+				
+				setPosition(xPos, yPos);
 			} else {
 				reachedWaypoint();
 			}
@@ -77,7 +82,7 @@ public class BondEntity extends GameEntity {
 			rotation = 0;
 			health -= delta;
 			frameRate = 0;
-			if (health < -10) {
+			if (health < DESTRUCTION_HEALTH) {
 				destroy();
 			}
 		}
@@ -182,13 +187,16 @@ public class BondEntity extends GameEntity {
 
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {
-		Color oldColor = batch.getColor();
-		if (health < INITIAL_HEALTH) {
+		if (health < 0) {
+			float norm = 1f - 1f / (health - DESTRUCTION_HEALTH );
+			if (norm < 0) norm = 0f;
+			setColor(1, 0, 0, norm);
+			
+		} else if (health < INITIAL_HEALTH) {
 			float norm = health / INITIAL_HEALTH;
-			batch.setColor(1, norm, norm, 1);
+			setColor(1, norm, norm, 1);
 		}
 		super.draw(batch, parentAlpha);
-		batch.setColor(oldColor);
 	}
 
 	/**

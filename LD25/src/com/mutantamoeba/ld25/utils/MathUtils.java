@@ -71,18 +71,55 @@ public class MathUtils {
 		return y < 0 ? -angle : angle;
 	}
 	
-	static public double distance(float x1, float y1, float x2, float y2) {
+	static public float distance(float x1, float y1, float x2, float y2) {
 		float x = x2 - x1;
 		float y = y2 - y1;
-		return sqrt(x*x + y*y);
+		return (float)sqrt(x*x + y*y);
 	}
+	
+	static public float distanceSquared(float x1, float y1, float x2, float y2) {
+		float x = x2 - x1;
+		float y = y2 - y1;
+		return (x*x + y*y);
+	}
+	
 	static public float degrees(float rads) {
 		return (rads * 180.0f) / PI;
 	}
 	static public float radians(float degs) {
 		return (degs * PI) / 180.0f;
 	}
+	
+	static public float dot(float x, float y, float x2, float y2) {
+		return (x*x2) + (y*y2);
+	}
 
+	/** Distance to a line
+	 * ported from http://stackoverflow.com/questions/849211/shortest-distance-between-a-point-and-a-line-segment
+	 * and removed dependency on 2d vector class
+	 * @param x
+	 * @param y
+	 * @param lineX1
+	 * @param lineY1
+	 * @param lineX2
+	 * @param lineY2
+	 * @return
+	 */
+	static public float distanceToLine(float x, float y, float lineX1, float lineY1, float lineX2, float lineY2) {
+		final float lineLenX = lineX2 - lineX1;
+		final float lineLenY = lineY2 - lineY2;
+		final float l2 = (lineLenX*lineLenX)+(lineLenY*lineLenY);
+		if (l2 == 0.0) return distance(x, y, lineX1, lineY1);
+		final float t = dot(x-lineX1, y-lineY1, lineLenX, lineLenY) / l2;
+		if (t < 0.0f) 
+			return distance(x, y, lineX1, lineY1);
+		else if (t > 1f) 
+			return distance(x, y, lineX2, lineY2);
+		final float projX = lineX1 + t * lineLenX;
+		final float projY = lineY1 + t * lineLenY;
+		return distance(x, y, projX, projY);
+	}
+	
 	/** The angular distance between startAngle and targetAngle (avoids turns of > 180 degrees) (generalised)
 	 * @param start start angle
 	 * @param target target angle

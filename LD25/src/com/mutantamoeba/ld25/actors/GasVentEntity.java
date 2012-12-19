@@ -32,7 +32,9 @@ public class GasVentEntity extends TrapEntity {
 	public void act(float delta) {		
 		super.act(delta);
 		if (isActivated()) {
-			spawnGas();
+			if (timeRemaining() > 0.5f) {
+				spawnGas();
+			}
 //			Console.debug("Hurting %d bonds", getRoom().getEntities().size);
 			for (GameEntity ent:getRoom().getEntities()) {
 				if (ent instanceof BondEntity) {
