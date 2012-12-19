@@ -39,7 +39,12 @@ public class GasVentEntity extends TrapEntity {
 			for (GameEntity ent:getRoom().getEntities()) {
 				if (ent instanceof BondEntity) {
 					BondEntity bond = (BondEntity)ent;
+					if (!bond.isAlive()) continue;
 					bond.hurt(POISON_DAMAGE * delta);
+					if (!bond.isAlive()) {
+						GameWorld.instance().getScoreKeeper().addScore("gas kills", 1);
+
+					}
 				}
 			}
 		}

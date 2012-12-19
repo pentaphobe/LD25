@@ -13,8 +13,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
@@ -302,7 +304,7 @@ public class GameScreen extends BasicScreen {
 
 		Actor fpsCounter = new FpsCounter(this);
 		fpsCounter.setPosition(Gdx.graphics.getWidth() - 60, Gdx.graphics.getHeight() - 20);
-		uiStage.addActor(fpsCounter);	
+		getUiStage().addActor(fpsCounter);	
 		
 		SimpleTextButton budget = new SimpleTextButton(this, "") {
 
@@ -317,7 +319,7 @@ public class GameScreen extends BasicScreen {
 			
 		};
 		budget.setPosition(10, Gdx.graphics.getHeight() - 20);		
-		uiStage.addActor(budget);
+		getUiStage().addActor(budget);
 		
 		SimpleTextButton lairHealth = new SimpleTextButton(this, "") {
 
@@ -335,7 +337,7 @@ public class GameScreen extends BasicScreen {
 		};
 		lairHealth.setColor(1, 0, 0, 1);
 		lairHealth.setPosition(10, Gdx.graphics.getHeight() - 50);		
-		uiStage.addActor(lairHealth);		
+		getUiStage().addActor(lairHealth);		
 		
 		SimpleTextButton entityCount = new SimpleTextButton(this, "total entities: 99999") {
 			/* (non-Javadoc)
@@ -350,7 +352,7 @@ public class GameScreen extends BasicScreen {
 		};
 //		entityCount.setPosition(10, Gdx.graphics.getHeight() - 70);
 		entityCount.setPosition(Gdx.graphics.getWidth() - entityCount.getWidth() - 20, Gdx.graphics.getHeight() - 50);	
-		uiStage.addActor(entityCount);
+		getUiStage().addActor(entityCount);
 		
 		
 		region = new TextureRegion(texture, 192, 192, 64, 64);
@@ -366,7 +368,7 @@ public class GameScreen extends BasicScreen {
 		roomInspector.setPosition(Gdx.graphics.getWidth() - roomInspector.getWidth(), Gdx.graphics.getHeight() - roomInspector.getHeight() - (2*fpsCounter.getHeight()) - 5);
 
 		///////// [@note this is the first object in the list now]
-		uiStage.getActors().insert(0, roomInspector);
+		getUiStage().getActors().insert(0, roomInspector);
 		
 		region = new TextureRegion(texture, 192, 160, 32, 32);
 		NinePatch panelPatch = new NinePatch(region, 2, 2, 2, 2);
@@ -378,7 +380,7 @@ public class GameScreen extends BasicScreen {
 //		panelPatch.setMiddleHeight(28);
 		sidePanel = new SidePanel(panelPatch);
 		sidePanel.setBounds(-1, -1, 96, Gdx.graphics.getHeight()+2);
-		uiStage.getActors().insert(0, sidePanel);
+		getUiStage().getActors().insert(0, sidePanel);
 		
 		TextureRegion buttRegions[] = new TextureRegion[3];
 		buttRegions[ToolButton.NORMAL] = new TextureRegion(texture, 160, 128, 32, 32);
@@ -389,7 +391,7 @@ public class GameScreen extends BasicScreen {
 		toolSelectionBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
 		toolSelectionBox.setZIndex(10000);
 		toolSelectionBox.setTouchable(Touchable.disabled);
-		uiStage.addActor(toolSelectionBox);		
+		getUiStage().addActor(toolSelectionBox);		
 		
 		region = new TextureRegion(texture, 160, 192, 32, 32);
 		mouseHoverBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
@@ -526,7 +528,7 @@ public class GameScreen extends BasicScreen {
 		
 		setToolTipBox(new TextBox(this, "tooltip"));
 		getToolTipBox().setVisible(false);
-		uiStage.addActor(getToolTipBox());
+		getUiStage().addActor(getToolTipBox());
 		
 	}
 	protected void deselectTool() {
@@ -573,6 +575,7 @@ public class GameScreen extends BasicScreen {
 							return true;
 						}
 						selfDestructRoom.removeEntity(selfDestructButton);
+						getWorld().getScoreKeeper().addScore("moved button", 1);
 					} 
 					
 					
@@ -770,7 +773,7 @@ public class GameScreen extends BasicScreen {
 			stage.act(delta);
 			
 		}
-		uiStage.act(delta);
+		getUiStage().act(delta);
 	}
 	
 	/* (non-Javadoc)
@@ -883,7 +886,7 @@ public class GameScreen extends BasicScreen {
 	public void resize(int width, int height) {
 		super.resize(width, height);
 		if (sidePanel != null) {
-			sidePanel.setBounds(0, 0, SIDEPANEL_WIDTH, uiStage.getHeight());
+			sidePanel.setBounds(0, 0, SIDEPANEL_WIDTH, getUiStage().getHeight());
 		}
 		
 	}
@@ -957,6 +960,11 @@ public class GameScreen extends BasicScreen {
 
 	public void setAllowEditing(boolean allowEditing) {
 		this.allowEditing = allowEditing;
+	}
+
+	public Stage getUiStage() {
+		// TODO Auto-generated method stub
+		return uiStage;
 	}
 }
 

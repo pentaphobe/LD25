@@ -70,6 +70,7 @@ public class GameBondSpawner {
 			increaseWaveDifficulties();	
 			inWave = false;
 			waveTimeCounter = 0;
+			world.getScoreKeeper().addScore("waves survived", 1);
 		}				
 		// do a wave
 		for (int i=0;i<waveSize;i++) {

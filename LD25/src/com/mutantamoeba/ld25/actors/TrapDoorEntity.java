@@ -2,6 +2,7 @@ package com.mutantamoeba.ld25.actors;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.mutantamoeba.ld25.GameWorld;
 import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.utils.MathUtils;
 
@@ -9,6 +10,8 @@ public class TrapDoorEntity extends TrapEntity {
 
 	public TrapDoorEntity(TrapDoorEntity other) {
 		super(other);
+		setReloadTime(2f);
+		setResetTime(0.75f);
 		deactivate();
 	}
 
@@ -48,10 +51,12 @@ public class TrapDoorEntity extends TrapEntity {
 			for (GameEntity ent:getRoom().getEntities()) {
 				if (ent instanceof BondEntity) {
 					BondEntity bond = (BondEntity)ent;
+					if (!bond.isAlive()) continue;
 					float xd = bond.getX() - this.getX();
 					float yd = bond.getY() - this.getY();
 					float dist = (float)MathUtils.sqrt(xd*xd + yd*yd);
 					if (dist < GameScreen.TILE_SIZE/2f) {
+						GameWorld.instance().getScoreKeeper().addScore("trapdoor kills", 1);
 						bond.destroy();
 					}
 				}

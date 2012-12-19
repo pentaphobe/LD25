@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.mutantamoeba.ld25.RoomTemplate.WallType;
@@ -8,6 +9,7 @@ import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.GasVentEntity;
 import com.mutantamoeba.ld25.actors.LaserTurretEntity;
 import com.mutantamoeba.ld25.actors.ParticleEmitterEntity;
+import com.mutantamoeba.ld25.actors.TextBox;
 import com.mutantamoeba.ld25.actors.TrapDoorEntity;
 import com.mutantamoeba.ld25.actors.TrapEntity;
 import com.mutantamoeba.ld25.screens.GameScreen;
@@ -30,7 +32,7 @@ public class GameWorld {
 	private GameScreen gameScreen;
 	private GameEconomy economy;
 	private GameBondSpawner spawner;
-
+	private GameScoreKeeper scoreKeeper;
 	private float secretLairHealth = SECRET_LAIR_INITIAL_HEALTH;
 	
 	
@@ -43,6 +45,8 @@ public class GameWorld {
 		this.tileMapWidth = mapWidth * ROOM_SIZE;
 		this.tileMapHeight = mapHeight * ROOM_SIZE;
 		tileMap = new TileMap(this, this.tileMapWidth, this.tileMapHeight);
+		
+		scoreKeeper = new GameScoreKeeper();
 		
 		economy = new GameEconomy();
 		setSpawner(new GameBondSpawner(this, 8));
@@ -308,6 +312,9 @@ public class GameWorld {
 				}
 				GameScreen.instance().sounds.trigger("explosion", 0.2f);
 				GameScreen.instance().setAllowEditing(false);
+				TextBox textBox = new TextBox(GameScreen.instance(), getScoreKeeper().getScoreString());
+				GameScreen.instance().getUiStage().addActor(textBox);
+				textBox.setPosition( (Gdx.graphics.getWidth()-textBox.getWidth())/2, (Gdx.graphics.getHeight()-textBox.getHeight())/2);
 			}
 		} 
 	}
@@ -324,5 +331,13 @@ public class GameWorld {
 	 */
 	public float getSecretLairHealth() {
 		return secretLairHealth;
+	}
+
+	public GameScoreKeeper getScoreKeeper() {
+		return scoreKeeper;
+	}
+
+	public void setScoreKeeper(GameScoreKeeper scoreKeeper) {
+		this.scoreKeeper = scoreKeeper;
 	}
 }

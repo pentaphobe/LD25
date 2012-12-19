@@ -21,14 +21,14 @@ public abstract class BasicScreen extends AbstractScreen {
 		stage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
 		stage.getSpriteBatch().getProjectionMatrix().scl(1, -1, 1);
 
-		uiStage = new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true);
+		setUiStage(new Stage( Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), true));
 		
 		
 		inputMultiplexer = new InputMultiplexer();
 		Gdx.input.setInputProcessor(inputMultiplexer);
 		
 		inputMultiplexer.addProcessor(this);		
-		inputMultiplexer.addProcessor(0, uiStage);			
+		inputMultiplexer.addProcessor(0, getUiStage());			
 		inputMultiplexer.addProcessor(stage);
 	}
 
@@ -54,13 +54,13 @@ public abstract class BasicScreen extends AbstractScreen {
 		update(delta);
 		
 		stage.draw();
-		uiStage.draw();		
+		getUiStage().draw();		
 	}
 	
 	public void update(float delta) {
 		if (!isPaused()) {
 			stage.act(delta);
-			uiStage.act(delta);
+			getUiStage().act(delta);
 		}
 	}	
 
@@ -76,7 +76,7 @@ public abstract class BasicScreen extends AbstractScreen {
 	public void dispose() {
 		font.dispose();
 		stage.dispose();
-		uiStage.dispose();
+		getUiStage().dispose();
 	}
 
 	public void toggleFullscreen() {
@@ -148,6 +148,22 @@ public abstract class BasicScreen extends AbstractScreen {
 	 */
 	public boolean isPaused() {
 		return paused;
+	}
+
+
+	/**
+	 * @param uiStage the uiStage to set
+	 */
+	public void setUiStage(Stage uiStage) {
+		this.uiStage = uiStage;
+	}
+
+
+	/**
+	 * @return the uiStage
+	 */
+	public Stage getUiStage() {
+		return uiStage;
 	}
 
 }

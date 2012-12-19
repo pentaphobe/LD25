@@ -32,7 +32,10 @@ public class TextBox extends Actor {
 	 */
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {		
-		font.draw(batch, label, getX(), getY() + getHeight());
+
+		font.setScale(1.5f);
+		font.drawMultiLine(batch, label, getX(), getY() + getHeight());
+		font.setScale(1);
 	}
 
 

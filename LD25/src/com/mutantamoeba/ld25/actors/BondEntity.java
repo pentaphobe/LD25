@@ -89,6 +89,7 @@ public class BondEntity extends GameEntity {
 			health -= delta;
 			frameRate = 0;
 			if (health < DESTRUCTION_HEALTH) {
+				die();
 				destroy();
 			}
 		}
@@ -238,6 +239,13 @@ public class BondEntity extends GameEntity {
 	 */
 	public LinkedList<Room> getPreviousRooms() {
 		return previousRooms;
+	}
+
+	@Override
+	public void destroy() {
+		GameWorld.instance().getScoreKeeper().addScore("total kills", 1);
+
+		super.destroy();
 	}
 	
 }
