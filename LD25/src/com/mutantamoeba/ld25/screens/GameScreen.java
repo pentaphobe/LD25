@@ -144,6 +144,8 @@ public class GameScreen extends BasicScreen {
 				if (currentTool != null) {
 					currentTool.apply((int)rx, (int)ry);
 				}
+				toolTipBox.setVisible(false);
+
 				
 				return super.touchDown(event, x, y, pointer, button);
 			}			
@@ -214,7 +216,13 @@ public class GameScreen extends BasicScreen {
 //					Console.debug("MOVEMOUSE");
 					room.mouseMoved(event.getStageX() - (mx * roomSize), event.getStageY() - (my * roomSize));					
 					mouseHoverBox.setVisible(false);
-
+					if (currentTool != null && currentTool.getName().equals("upgrade")) {
+						toolTipBox.setLabel(String.format("upgrade £%.0f", room.config().getUpgradeCost()));
+						toolTipBox.setPosition(event.getStageX(), event.getStageY());
+						toolTipBox.setVisible(true);
+					} else {
+						toolTipBox.setVisible(false);
+					}
 				} else {
 					mouseHoverBox.setColor(1,1,1,1);
 					mouseHoverBox.setVisible(true);
@@ -291,7 +299,7 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void act(float delta) {
-				setLabel(String.format("budget: $%.2f", getWorld().getEconomy().budget()));
+				setLabel(String.format("budget: £%.0f", getWorld().getEconomy().budget()));
 				super.act(delta);
 			}
 			
@@ -385,13 +393,20 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
-				
-				if (((ToolButton)event.getTarget()).isEnabled()) {
+				ToolButton toolButton = (ToolButton)event.getTarget();
+				if (toolButton.isEnabled()) {
 					event.cancel();
-					String toolName = ((ToolButton)event.getTarget()).toolName;
+					String toolName = toolButton.toolName;
+					
+					if (currentTool != null && toolName.equals(currentTool.getName())) {
+						currentTool = null;
+						return;
+					}
+					
 					selectTool(toolName);
 					ToolButton me = (ToolButton)event.getTarget();
 					toolSelectionBox.setBounds(me.getX(), me.getY(), me.getWidth(), me.getHeight());
+					toolTipBox.setVisible(false);
 					super.clicked(event, x, y);
 				}
 			}			
@@ -409,9 +424,9 @@ public class GameScreen extends BasicScreen {
 					GameTool tool = getTool(button.getToolName());
 					int cost = (int)tool.getCost(); 
 					if (cost > 0) {
-						tipText = tipText + String.format(" $%d", cost);
+						tipText = tipText + String.format(" £%d", cost);
 					} else {
-						tipText = tipText + " $(depends on room)";
+						tipText = tipText + " £(depends on room)";
 					}
 					getToolTipBox().setLabel( tipText);
 					getToolTipBox().setVisible(true);

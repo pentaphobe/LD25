@@ -39,13 +39,13 @@ public class MainMenuScreen extends BasicScreen {
 	}
 	
 	/* (non-Javadoc)
-	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyDown(int)
+	 * @see com.mutantamoeba.ld25.engine.BasicInputProcessor#keyTyped(char)
 	 */
 	@Override
-	public boolean keyDown(int keycode) {
+	public boolean keyTyped(char character) {
 		startGame();
 		
-		return super.keyDown(keycode);
+		return super.keyTyped(character);
 	}
 	
 	public void startGame() {

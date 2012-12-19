@@ -62,7 +62,7 @@ public class ToolButton extends SimpleButton {
 	}
 	@Override
 	public String getToolTip() { 
-		return super.getToolTip() + "\nkey: " + this.hotKey + " ";
+		return super.getToolTip() + " key: " + this.hotKey;
 	}
 
 }

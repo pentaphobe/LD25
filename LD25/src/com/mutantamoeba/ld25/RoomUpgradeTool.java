@@ -17,15 +17,15 @@ public class RoomUpgradeTool extends GameTool {
 //			Console.debug("no room to upgrade at %d, %d", (int)mx, (int)my);			
 			return false;
 		} else {
-			setCost(room.config().getUpgradeCost());
+			float theCost = room.config().getUpgradeCost();
 //			Console.debug("upgrade cost: %f", getCost());
-			if (canApply() && room.config().canUpgrade()) {						
+			if (canApply(theCost) && room.config().canUpgrade()) {						
 //				Console.debug("level before upgrade:%d", room.config().level());
 				room.upgrade();
 //				Console.debug("  after upgrade:%d", room.config().level());
 				world.roomMap.makeTemplatedRoom((int)mx, (int)my, room.config());
 				gameScreen.getTileRenderer().updateFromMap();
-				applyCost(getCost());
+				applyCost(theCost);
 			} else {
 				gameScreen.selectRoom((int)mx, (int)my);
 				return false;
