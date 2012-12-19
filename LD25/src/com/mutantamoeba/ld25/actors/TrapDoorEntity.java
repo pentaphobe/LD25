@@ -22,10 +22,13 @@ public class TrapDoorEntity extends TrapEntity {
 
 	@Override
 	public void activate() {
-		if (!isActivated() && isReloaded()) {
-			GameScreen.instance().sounds.trigger("trapdoor", .1f);
-		}
+
 		super.activate();
+	}
+	
+	@Override
+	public void start(float delta) {
+			GameScreen.instance().sounds.trigger("trapdoor", .03f);
 	}
 
 	@Override

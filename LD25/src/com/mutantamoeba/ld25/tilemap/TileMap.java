@@ -19,6 +19,15 @@ public class TileMap extends ParameterMap<Tile> {
 			empty.layers[0] = world.gameScreen().gameTiles.getTileIndex(0, 0, world.gameScreen().gameTiles.getId("blank"));
 		}
 		this.world = world;
+		
+//		// put 
+//		for (int y=0, offs =0;y<_h;y++) {
+//			for (int x=0; x<_w; x++, offs++) {
+//				Tile t = new Tile();
+//				t.setTileMapX(x);
+//				t.setTileMapY(y);
+//			}
+//		}
 	}
 
 }

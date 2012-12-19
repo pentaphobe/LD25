@@ -185,7 +185,7 @@ public class BondEntity extends GameEntity {
 		Color oldColor = batch.getColor();
 		if (health < INITIAL_HEALTH) {
 			float norm = health / INITIAL_HEALTH;
-			batch.setColor(1, 1-norm, 1-norm, 1);
+			batch.setColor(1, norm, norm, 1);
 		}
 		super.draw(batch, parentAlpha);
 		batch.setColor(oldColor);

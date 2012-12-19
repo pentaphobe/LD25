@@ -20,6 +20,9 @@ public class Room {
 		this.config(config);
 	}
 	public void destroy() {
+		removeTrapEntities();
+	}
+	private void removeTrapEntities() {
 		for (TrapEntity trap:trapEntities) {
 			removeTrapEntity(trap);
 		}
@@ -60,6 +63,7 @@ public class Room {
 		return config;
 	}
 	public void upgrade() {
+		removeTrapEntities();
 		config.upgrade();		
 	}
 	public boolean equals(Room r) {
@@ -101,6 +105,7 @@ public class Room {
 	}
 	public void addTrapEntity(TrapEntity e) {
 		trapEntities.add(e);
+		e.setRoom(this);
 		GameScreen.instance().addEntity(e);
 	}
 	public void removeTrapEntity(TrapEntity e) {
@@ -118,8 +123,9 @@ public class Room {
 		addTrapEntity(trap);
 	}
 	public void mouseMoved(float x, float y) {
+		//y = (GameScreen.TILE_SIZE * GameWorld.ROOM_SIZE) - y;
 		for (TrapEntity trap:trapEntities) {
-			trap.mouseMoved(x, y);
+			trap.mouseMoved(x - getRelativeX(trap), y - getRelativeY(trap));
 		}
 	}
 	public void inheritEntities(Room oldRoom) {

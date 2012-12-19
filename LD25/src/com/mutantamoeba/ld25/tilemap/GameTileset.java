@@ -26,6 +26,9 @@ public class GameTileset {
 		case MULTI:
 			set = TileSubset.createMulti(tileIndices);
 			break;
+		case RAND:
+			set = TileSubset.createRand(tileIndices);
+			break;
 		case NINEPATCH:
 			set = TileSubset.createNinePatch(tileIndices);
 			break;
@@ -62,13 +65,20 @@ public class GameTileset {
 	 */
 	public int getTileIndex(int x, int y, int tileId) {
 		TileSubset subset = tileSubsets.get(tileId);
+		int indices[];
+		int index;
 		switch (subset.type) {
 		case SINGLE:
 			return ((TileSubsetSingle)subset).tileIndex;
 		case MULTI:
-			int indices[] = ((TileSubsetMulti)subset).tileIndices; 
-			int index = (int)((x+y) % indices.length);
+			indices = ((TileSubsetMulti)subset).tileIndices; 
+			index = (int)((x+y) % indices.length);
 			return indices[index];
+		case RAND:
+			indices = ((TileSubsetRand)subset).tileIndices; 
+			index = (int)((RandomNumbers.locHash(x, y+x) & 0xfffffff) % indices.length);
+//			Console.debug("%d, %d - %d", x, y, index);
+			return indices[index];			
 		default:
 			return 0;
 		}

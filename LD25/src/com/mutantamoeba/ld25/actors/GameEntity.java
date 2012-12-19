@@ -118,7 +118,7 @@ public class GameEntity extends Group {
 		}
 	}
 	
-	private boolean updateRoom(int x, int y) {
+	protected boolean updateRoom(int x, int y) {
 		EntityGroup par = ((EntityGroup)this.getParent());
 		Room oldRoom = getRoom();
 		setRoom(GameWorld.instance().roomMap.get(x, y));

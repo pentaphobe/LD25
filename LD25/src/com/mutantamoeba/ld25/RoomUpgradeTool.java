@@ -8,13 +8,14 @@ public class RoomUpgradeTool extends GameTool {
 		super(name, gameScreen, 0);
 	}
 	@Override
-	public void apply(int mx, int my) {
+	public boolean apply(int mx, int my) {
 		GameWorld world = gameScreen.getWorld();
 		
 		RoomTemplate tpl = world.getRoomTemplate(name);
 		Room room = world.roomMap.get((int)mx, (int)my);
 		if (room == null) {
-			Console.debug("no room to upgrade at %d, %d", (int)mx, (int)my);
+//			Console.debug("no room to upgrade at %d, %d", (int)mx, (int)my);			
+			return false;
 		} else {
 			setCost(room.config().getUpgradeCost());
 //			Console.debug("upgrade cost: %f", getCost());
@@ -25,8 +26,12 @@ public class RoomUpgradeTool extends GameTool {
 				world.roomMap.makeTemplatedRoom((int)mx, (int)my, room.config());
 				gameScreen.getTileRenderer().updateFromMap();
 				applyCost(getCost());
+			} else {
+				gameScreen.selectRoom((int)mx, (int)my);
+				return false;
 			}
 			gameScreen.selectRoom((int)mx, (int)my);
 		}
+		return true;
 	}
 }

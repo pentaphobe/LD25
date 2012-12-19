@@ -29,7 +29,7 @@ public class MathUtils {
 		return a - (int)a;
 	}
 	
-	/* Just a port of well-known code (original source unknown, I found it via the Google Oracle)
+	/** Just a port of well-known code (original source unknown, I found it via the Google Oracle)
 	 * 
 	 */
 	static public double sqrt(final double a) {
@@ -41,7 +41,7 @@ public class MathUtils {
 	    return y;
 	}	
 	
-	/* Just a port of well-known code (original source unknown, I found it via the Google Oracle)
+	/** Just a port of well-known code (original source unknown, I found it via the Google Oracle)
 	 * 
 	 */
 	static public float inverseSqrt(double x) {
@@ -53,7 +53,7 @@ public class MathUtils {
         return (float)x; 
 	}
 	
-	/* Just a port of well-known code (original source unknown, I found it via the Google Oracle)
+	/** Just a port of well-known code (original source unknown, I found it via the Google Oracle)
 	 * 
 	 */	
 	static public float atan2(float y, float x) {
@@ -83,23 +83,34 @@ public class MathUtils {
 		return (degs * PI) / 180.0f;
 	}
 
-	/* The angular distance between startAngle and targetAngle (avoids turns of > 180 degrees)
-	 * @param start the source angle
-	 * @param target the angle we wish to turn towards
+	/** The angular distance between startAngle and targetAngle (avoids turns of > 180 degrees) (generalised)
+	 * @param start start angle
+	 * @param target target angle
+	 * @param maxAngle use PI for radians and 180 for degrees
+	 * @return the direction delta
 	 */
-	static public float dirDelta(float start, float target) {
+	static public float dirDelta(float start, float target, float maxAngle) {
 	    float deltaDir = target - start;
 	    
 	    // constrain the delta so that our head doesn't spin the long way around
-	    while (deltaDir < -PI)
-	        deltaDir += 2*PI;
-	    while (deltaDir > PI)
-	        deltaDir -= 2*PI;
+	    while (deltaDir < -maxAngle)
+	        deltaDir += 2*maxAngle;
+	    while (deltaDir > maxAngle)
+	        deltaDir -= 2*maxAngle;
 	        
 	    return deltaDir;
 	}
+	
+	/** The angular distance between startAngle and targetAngle (avoids turns of > 180 degrees)  in radians 
+	 * @param start the source angle in radians
+	 * @param target the angle we wish to turn towards in radians
+	 * @return the direction delta in radians
+	 */
+	static public float dirDelta(float start, float target) {
+		return dirDelta(start, target, PI);
+	}
 
-	/* performs a simple Hermite Blend
+	/** performs a simple Hermite Blend
 	 * 
 	 */
 	static public float hermiteBlend(float x, float y, float t) {
@@ -107,7 +118,7 @@ public class MathUtils {
 	    return x + (y-x)*bl;
 	}
 
-	/* turns a smooth value between 0..1 into a ridged (discrete) value in the same range
+	/** turns a smooth value between 0..1 into a ridged (discrete) value in the same range
 	 * @param x the input value (between 0 and 1)
 	 * @param ridges how many discrete steps in the result
 	 */

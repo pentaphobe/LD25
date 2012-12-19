@@ -3,6 +3,7 @@ package com.mutantamoeba.ld25;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.mutantamoeba.ld25.RoomTemplate.WallType;
 import com.mutantamoeba.ld25.actors.GasVentEntity;
+import com.mutantamoeba.ld25.actors.LaserTurretEntity;
 import com.mutantamoeba.ld25.actors.TrapDoorEntity;
 import com.mutantamoeba.ld25.actors.TrapEntity;
 import com.mutantamoeba.ld25.screens.GameScreen;
@@ -132,11 +133,16 @@ public class GameWorld {
 		
 		tpl = addRoomTemplate("laser", 4);
 		tpl.setCosts(roomCosts);
-		tpl.setTrapEntity(WallType.UPLEFT, new TrapEntity(gameScreen.texture, 35));		
-		tpl.setTrapEntity(WallType.UPRIGHT, new TrapEntity(gameScreen.texture, 34));
-		tpl.setTrapEntity(WallType.DOWNRIGHT, new TrapEntity(gameScreen.texture, 33));
-		tpl.setTrapEntity(WallType.DOWNLEFT, new TrapEntity(gameScreen.texture, 32));
+//		tpl.setTrapEntity(WallType.UPLEFT, new TrapEntity(gameScreen.texture, 35));		
+//		tpl.setTrapEntity(WallType.UPRIGHT, new TrapEntity(gameScreen.texture, 34));
+//		tpl.setTrapEntity(WallType.DOWNRIGHT, new TrapEntity(gameScreen.texture, 33));
+//		tpl.setTrapEntity(WallType.DOWNLEFT, new TrapEntity(gameScreen.texture, 32));
+		tpl.setTrapEntity(WallType.UPLEFT, new LaserTurretEntity(gameScreen.texture, 36));		
+		tpl.setTrapEntity(WallType.UPRIGHT, new LaserTurretEntity(gameScreen.texture, 36));
+		tpl.setTrapEntity(WallType.DOWNRIGHT, new LaserTurretEntity(gameScreen.texture, 36));
+		tpl.setTrapEntity(WallType.DOWNLEFT, new LaserTurretEntity(gameScreen.texture, 36));
 
+		
 		tpl.setObjectTiles(0, new int[] {
 			35, -1, -1, -1, -1,
 			-1, -1, -1, -1, -1,

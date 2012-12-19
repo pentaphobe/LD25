@@ -61,10 +61,12 @@ public class GasVentEntity extends TrapEntity {
 	}
 
 	@Override
+	public void start(float delta) {
+		GameScreen.instance().sounds.trigger("gas", .03f);
+	}
+	
+	@Override
 	public void activate() {
-		if (!isActivated() && isReloaded()) {
-			GameScreen.instance().sounds.trigger("gas", .1f);
-		}
 		super.activate();
 	}	
 }

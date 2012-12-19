@@ -24,7 +24,13 @@ public abstract class GameTool {
 	public boolean canApply(float dynamicCost) {
 		return gameScreen.getWorld().getEconomy().budget() >= dynamicCost;
 	}	
-	public abstract void apply(int mx, int my);
+	
+	/**
+	 * @param mx the map position X
+	 * @param my map position Y
+	 * @return true for successfully applied, false if bailed out
+	 */
+	public abstract boolean apply(int mx, int my);
 	/**
 	 * @param name the name to set
 	 */

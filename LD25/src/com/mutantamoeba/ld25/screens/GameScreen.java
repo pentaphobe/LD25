@@ -8,12 +8,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
-import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
@@ -47,9 +45,11 @@ public class GameScreen extends BasicScreen {
 	static final int WORLD_WIDTH = 16;
 	static final int WORLD_HEIGHT = 16;
 	public static final int TILE_SIZE = 32;
+	public static final int HTILE_SIZE = TILE_SIZE / 2;
 	static final float SCROLL_SPEED = 200f; // pixels per second
 	static final float SCROLL_FAST_MULTIPLIER = 3f; // how much faster than SCROLL_SPEED do we go in fast mode?
 	private static final float SIDEPANEL_WIDTH = 90;
+	
 	
 	public Texture texture;
 	boolean showFPS = true;
@@ -79,13 +79,23 @@ public class GameScreen extends BasicScreen {
 		sounds = new SoundWrapper();
 		sounds.loadSound("gas", "sounds/gas.wav");
 		sounds.loadSound("trapdoor", "sounds/trapdoor.wav");
+		sounds.loadSound("laser", "sounds/laser.wav");
 		
 		texture = new Texture("data/tiles.png");
 		texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
 		gameTiles = new GameTileset(texture, 32);
 
-		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 26, 27);		
+		// SIMPLE
+		gameTiles.addSubset("blank", TileSubset.Type.SINGLE, 25);
+		// REGULAR
+//		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 26, 27);
+		
+		// RANDOM
+		// [@temporary dodgy way of ensuring not much of 11 or 13 show up]
+//		gameTiles.addSubset("blank", TileSubset.Type.RAND, 3,4,3,4,3,4,3,4,3,4,3,4,3,4,5);
+//		gameTiles.addSubset("blank", TileSubset.Type.RAND, 11, 12, 12, 12, 12, 12, 12,12, 12, 12, 12, 12, 12, 12, 12, 12, 13);
+		
 //		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 27, 24);
 		gameTiles.addSubset("wall", TileSubset.Type.NINEPATCH, 16, 17, 18, 8, 9, 10, 0, 1, 2 );
 		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
@@ -135,8 +145,8 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void drag(InputEvent event, float x, float y, int pointer) {				
-				x /= TILE_SIZE * GameWorld.ROOM_SIZE;
-				y /= TILE_SIZE * GameWorld.ROOM_SIZE;
+				int mx = (int) (x / (TILE_SIZE * GameWorld.ROOM_SIZE));
+				int my = (int) (y / (TILE_SIZE * GameWorld.ROOM_SIZE));
 
 				// test behaviour
 //				if (world.roomMap.get((int)x, (int)y) == null) {
@@ -144,8 +154,13 @@ public class GameScreen extends BasicScreen {
 //					tileRenderer.updateFromMap();
 //				}
 //				selectRoom((int)x, (int)y);
-				if (currentTool != null) {
-					currentTool.apply((int)x, (int)y);
+				if (currentTool == null || !currentTool.apply((int)x, (int)y)) {
+//					Console.debug("DRAG MOVEMOUSE");
+					Room room = world.roomMap.get(mx, my);
+					int roomSize = (TILE_SIZE * GameWorld.ROOM_SIZE);
+					if (room != null) {							
+						room.mouseMoved(event.getStageX() - (mx * roomSize), event.getStageY() - (my * roomSize));	
+					}
 				}
 				super.drag(event, x, y, pointer);
 			}			
@@ -170,8 +185,8 @@ public class GameScreen extends BasicScreen {
 				mouseHoverBox.setBounds(mx * roomSize, my * roomSize, roomSize, roomSize);
 
 				if (room != null) {
-					
-					room.mouseMoved(x - (mx * roomSize), y - (my * roomSize));					
+//					Console.debug("MOVEMOUSE");
+					room.mouseMoved(event.getStageX() - (mx * roomSize), event.getStageY() - (my * roomSize));					
 					mouseHoverBox.setVisible(false);
 
 				} else {
@@ -397,13 +412,17 @@ public class GameScreen extends BasicScreen {
 	public void setupTools() {
 		GameTool tool = new GameTool("remove", this, 200) {
 			@Override
-			public void apply(int mx, int my) {
+			public boolean apply(int mx, int my) {
 				if (canApply()) {
+					Room r = getWorld().roomMap.get(mx, my);
+					r.destroy();
 					getWorld().roomMap.remove(mx, my);
 					getTileRenderer().updateFromMap();
 					applyCost();
 					deselectRoom();
+					return true;
 				}
+				return false;
 			}
 			
 		};
@@ -604,7 +623,8 @@ public class GameScreen extends BasicScreen {
 	@Override
 	public boolean scrolled(int amount) {
 //		Console.debug("SCROLLED:%d", amount);
-		OrthographicCamera cam = (OrthographicCamera)stage.getCamera(); 
+		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
+		// [@todo make zoom center around the mouse]
 		cam.zoom += amount / 10.0f;
 		float minZoom = 0.25f;
 		float maxZoom = 10;
@@ -613,6 +633,7 @@ public class GameScreen extends BasicScreen {
 		} else if (cam.zoom > maxZoom) {
 			cam.zoom = maxZoom;
 		}
+		
 		return super.scrolled(amount);
 	}
 	
@@ -641,6 +662,11 @@ public class GameScreen extends BasicScreen {
 				// slows spawning a lot
 				getWorld().getSpawner().setSpawnFrequency(1000);
 				return true;
+		case 'x':
+				dispose();
+
+				LD25.instance().setScreen(new MainMenuScreen(game));
+				break;
 		case ' ':
 			Console.debug("PAUSING");
 			togglePaused();
@@ -739,3 +765,4 @@ public class GameScreen extends BasicScreen {
 		
 	}
 }
+

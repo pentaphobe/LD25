@@ -7,7 +7,7 @@ public class RoomCreationTool extends GameTool {
 		super(name, gameScreen, gameScreen.getWorld().getRoomTemplate(name).getCost());
 	}
 	@Override
-	public void apply(int mx, int my) {
+	public boolean apply(int mx, int my) {
 		GameWorld world = gameScreen.getWorld();
 		
 		RoomTemplate tpl = world.getRoomTemplate(name);
@@ -16,8 +16,13 @@ public class RoomCreationTool extends GameTool {
 			world.roomMap.makeTemplatedRoom((int)mx, (int)my, tpl);
 			gameScreen.getTileRenderer().updateFromMap();
 			applyCost();
+		} else {
+			gameScreen.selectRoom((int)mx, (int)my);
+
+			return false;
 		}
-		gameScreen.selectRoom((int)mx, (int)my);		
+		gameScreen.selectRoom((int)mx, (int)my);
+		return true;
 	}
 
 }

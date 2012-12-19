@@ -49,9 +49,17 @@ public class TileRenderer extends Actor {
 //					Console.debug("tileId:%d, tileIndex:%d", tileId, tileIndex);
 					
 					int tileIndex = t.getLayer(layer);
+					
+					// [@todo this is required for MULTI and RAND tiles to work because of design inconsistency]
+					// [@... fix this so that representation is consistent]
+//					if (t == TileMap.empty) {
+//						tileIndex = tileSet.getTileIndex(x, y, 0);
+//					}
+					
 					if (tileIndex == -1) {
 						continue;
 					}
+
 					int texX = tileIndex % textureTileWidth;
 					int texY = tileIndex / textureTileWidth;
 					cache.add(tileSet.texture, tileX, tileY, texX * GameScreen.TILE_SIZE, texY

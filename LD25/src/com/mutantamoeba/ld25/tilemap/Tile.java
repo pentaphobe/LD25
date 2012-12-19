@@ -7,7 +7,7 @@ public class Tile {
 	public static final int FLOOR_LAYER = 0;
 	public static final int HAZARD_LAYER = 1;
 	public static final int WALL_LAYER = 2;
-	
+	int tileMapX=0, tileMapY=0;
 	public int layers[] = new int[TileMap.TOTAL_LAYERS];
 	public Tile() {
 		clear();
@@ -34,6 +34,18 @@ public class Tile {
 		for (int i=0;i<TileMap.TOTAL_LAYERS;i++) {
 			layers[i] = -1;
 		}
-		layers[0] = GameScreen.instance().gameTiles.getTileIndex(0, 0, GameScreen.instance().gameTiles.getId("blank"));
+		layers[0] = GameScreen.instance().gameTiles.getTileIndex(tileMapX,tileMapY, GameScreen.instance().gameTiles.getId("blank"));
+	}
+	public int getTileMapX() {
+		return tileMapX;
+	}
+	public void setTileMapX(int tileMapX) {
+		this.tileMapX = tileMapX;
+	}
+	public int getTileMapY() {
+		return tileMapY;
+	}
+	public void setTileMapY(int tileMapY) {
+		this.tileMapY = tileMapY;
 	}
 }
