@@ -3,7 +3,7 @@ package com.mutantamoeba.ld25;
 import com.mutantamoeba.ld25.engine.Console;
 
 public class GameEconomy {
-	static final float DEFAULT_STARTING_BUDGET = 10 * 1000;
+	static final float DEFAULT_STARTING_BUDGET = 6 * 1000;
 	private float	currentBudget;
 	
 	// [@temp just a constant increase]

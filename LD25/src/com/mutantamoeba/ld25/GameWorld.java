@@ -1,9 +1,13 @@
 package com.mutantamoeba.ld25;
 
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ObjectMap;
 import com.mutantamoeba.ld25.RoomTemplate.WallType;
+import com.mutantamoeba.ld25.actors.BondEntity;
+import com.mutantamoeba.ld25.actors.GameEntity;
 import com.mutantamoeba.ld25.actors.GasVentEntity;
 import com.mutantamoeba.ld25.actors.LaserTurretEntity;
+import com.mutantamoeba.ld25.actors.ParticleEmitterEntity;
 import com.mutantamoeba.ld25.actors.TrapDoorEntity;
 import com.mutantamoeba.ld25.actors.TrapEntity;
 import com.mutantamoeba.ld25.screens.GameScreen;
@@ -14,6 +18,8 @@ public class GameWorld {
 	static GameWorld instance;
 	
 	public static final int ROOM_SIZE = 5;
+
+	public static final float SECRET_LAIR_INITIAL_HEALTH = 100;
 	public int mapWidth, mapHeight;
 	public int tileMapWidth, tileMapHeight;
 
@@ -24,6 +30,8 @@ public class GameWorld {
 	private GameScreen gameScreen;
 	private GameEconomy economy;
 	private GameBondSpawner spawner;
+
+	private float secretLairHealth = SECRET_LAIR_INITIAL_HEALTH;
 	
 	
 	public GameWorld(GameScreen gameScreen, int mapWidth, int mapHeight) {
@@ -64,7 +72,7 @@ public class GameWorld {
 		float roomCosts[] = new float[] { 1000, 1000, 2000, 3000 };
 		
 		tpl = addRoomTemplate("basic", 4);
-		tpl.setCosts(200, 200, 400, 800);
+		tpl.setCosts(500, 600, 800, 1000);
 		
 		tpl = addRoomTemplate("gas", 4);
 		tpl.setCosts(roomCosts);
@@ -249,6 +257,10 @@ public class GameWorld {
 		}
 		return null;
 	}
+	
+	public Array<Room> getEdgeRooms() {
+		return roomMap.entryRooms;
+	}
 
 	/**
 	 * @param spawner the spawner to set
@@ -262,5 +274,55 @@ public class GameWorld {
 	 */
 	public GameBondSpawner getSpawner() {
 		return spawner;
+	}
+
+	public void attackDestructRoom(float attackStrength, float delta) {
+		if (getSecretLairHealth() > 0) {
+			setSecretLairHealth(getSecretLairHealth() - (attackStrength * delta));		
+			if (getSecretLairHealth() <= 0) {
+				// send a message to the game logic indicating the end (eventually)
+				// for now just spam explosions and disable editing
+				
+	//			GameScreen.instance().setPaused(true);
+				float halfRoom = GameScreen.HTILE_SIZE * GameWorld.ROOM_SIZE;
+				for (int i=0;i<roomMap._area;i++) {
+					Room room = roomMap.get(i);
+					if (room == null) continue;
+					if (room.hasBonds()) {
+						for (GameEntity ent:room.getEntities()) {
+							if (ent instanceof BondEntity) {
+								((BondEntity)ent).hurt(100);
+							}
+						}
+					}
+					for (int j=0;j<3;j++) {
+						// spawn explosion generators
+						ParticleEmitterEntity pee = new ParticleEmitterEntity(61);
+						GameScreen.instance().addEntity(pee);
+						room.addEntity(pee);
+						pee.setColor(1, .2f + RandomNumbers.nextFloat()*0.5f, .2f, 0.5f);
+						float xOffs = (RandomNumbers.nextFloat()-0.5f) * halfRoom;
+						float yOffs = (RandomNumbers.nextFloat()-0.5f) * halfRoom;
+						pee.setPosition(room.getWorldX() + halfRoom + xOffs, room.getWorldY() + halfRoom + yOffs);
+					}
+				}
+				GameScreen.instance().sounds.trigger("explosion", 0.2f);
+				GameScreen.instance().setAllowEditing(false);
+			}
+		} 
+	}
+
+	/**
+	 * @param secretLairHealth the secretLairHealth to set
+	 */
+	public void setSecretLairHealth(float secretLairHealth) {
+		this.secretLairHealth = secretLairHealth;
+	}
+
+	/**
+	 * @return the secretLairHealth
+	 */
+	public float getSecretLairHealth() {
+		return secretLairHealth;
 	}
 }

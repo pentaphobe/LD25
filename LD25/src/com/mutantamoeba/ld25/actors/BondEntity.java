@@ -22,8 +22,10 @@ public class BondEntity extends GameEntity {
 	private static final float MIN_WAYPOINT_PROXIMITY = .5f;
 	private static final int MEMORY_LENGTH = 12;
 	private static final float DESTRUCTION_HEALTH = -10f;
+	private static final float ATTACK_STRENGTH = 4;
 	public static float speed = 60f;
 	private float health;
+	public boolean attackingLair = false;
 	
 	// switching to standard linked list since PooledLinkedList doesn't keep track of its size (!?)
 //	PooledLinkedList<Room> previousRooms = new PooledLinkedList<Room>(MEMORY_LENGTH);
@@ -55,6 +57,10 @@ public class BondEntity extends GameEntity {
 	public void act(float delta) {
 		super.act(delta);
 		if (isAlive()) {
+			if (attackingLair) {
+				attackDestructRoom(delta);
+				return;
+			}
 			if (waypoint == null) {
 				waypoint = new Vector2();
 				reachedWaypoint();
@@ -87,6 +93,18 @@ public class BondEntity extends GameEntity {
 			}
 		}
 	}
+	
+	private boolean isInDestructRoom() {
+		return getRoom() != null && getRoom() == GameScreen.instance().selfDestructRoom;
+	}
+
+	private void attackDestructRoom(float delta) {
+		if (!isInDestructRoom()) {
+			attackingLair = false;
+			return;
+		}
+		GameWorld.instance().attackDestructRoom(ATTACK_STRENGTH, delta);
+	}
 
 	private void reachedWaypoint() {
 		Room targetRoom = null;
@@ -101,9 +119,18 @@ public class BondEntity extends GameEntity {
 				return;
 			}			
 		}
+		if (isInDestructRoom()) {
+			stop();
+			attackingLair = true;
+			return;
+		}
+		attackingLair = false;
+		
+		
 		Array<Room> exits = getRoom().getExits();
 		if (exits.size == 0) {
 			Console.debug("### BAD!  disconnected room - trapped Bond");
+			waypoint.set(getX(), getY());
 			return;
 		}
 //		Console.debug("%d total exits available", exits.size);

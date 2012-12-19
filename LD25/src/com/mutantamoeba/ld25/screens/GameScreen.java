@@ -3,6 +3,7 @@ package com.mutantamoeba.ld25.screens;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
@@ -54,6 +55,7 @@ public class GameScreen extends BasicScreen {
 	
 	public Texture texture;
 	boolean showFPS = true;
+	boolean allowEditing = true;
 
 	private GameWorld world;
 	RoomRenderer roomRenderer;
@@ -73,43 +75,24 @@ public class GameScreen extends BasicScreen {
 	private SidePanel sidePanel;
 	public SoundWrapper sounds;
 	private static GameScreen instance;
+	Preferences preferences;
 
 	public GameScreen(Game game) {
 		super(game);
+		
+		setupPreferences();
+		
 		instance = this;
 //		setClearScreen(false);
-		
-		sounds = new SoundWrapper();
-		sounds.loadSound("gas", "sounds/gas.wav");
-		sounds.loadSound("trapdoor", "sounds/trapdoor.wav");
-		sounds.loadSound("laser", "sounds/laser.wav");
-		sounds.loadSound("alarm", "sounds/alarm.wav");
-		
+
+		setupSounds();
+
 		texture = new Texture("data/tiles.png");
 		texture.setFilter(TextureFilter.Nearest, TextureFilter.Nearest);
 		texture.setWrap(TextureWrap.ClampToEdge, TextureWrap.ClampToEdge);
-		gameTiles = new GameTileset(texture, 32);
-
-		// SIMPLE
-		gameTiles.addSubset("blank", TileSubset.Type.SINGLE, 25);
-		// REGULAR
-//		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 26, 27);
 		
-		// RANDOM
-		// [@temporary dodgy way of ensuring not much of 11 or 13 show up]
-//		gameTiles.addSubset("blank", TileSubset.Type.RAND, 3,4,3,4,3,4,3,4,3,4,3,4,3,4,5);
-//		gameTiles.addSubset("blank", TileSubset.Type.RAND, 11, 12, 12, 12, 12, 12, 12,12, 12, 12, 12, 12, 12, 12, 12, 12, 13);
-		
-//		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 27, 24);
-		gameTiles.addSubset("wall", TileSubset.Type.NINEPATCH, 16, 17, 18, 8, 9, 10, 0, 1, 2 );
-		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
-		
-//		uiStage.getSpriteBatch().getTransformMatrix().scale(1, -1, 1);
-		
-//		uiStage.getCamera().combined.set
-
-		
-		
+		setupTiles();
+				
 		setWorld(new GameWorld(this, WORLD_WIDTH, WORLD_HEIGHT));
 		
 		setTileRenderer(new TileRenderer(getWorld(), gameTiles));
@@ -120,13 +103,35 @@ public class GameScreen extends BasicScreen {
 		this.entities = new EntityGroup(getWorld());		
 		stage.addActor(this.entities);		
 		
+		createRoomRenderer();
+		
+		setupUI();
+
+		
+//		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
+//		cam.translate(1000, 1000);
+		
+		if (Gdx.graphics.isGL20Available()) {
+			shaderProgram = createShader();
+			stage.getSpriteBatch().setShader(shaderProgram);
+//			tileRenderer.setShader(sp);
+		}
+		
+	}
+	
+	private void createRoomRenderer() {
 		roomRenderer = new RoomRenderer(getWorld());
 		roomRenderer.addListener(new InputListener() {
 			/* (non-Javadoc)
 			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
 			 */
 			@Override
-			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {				
+			public boolean touchDown(InputEvent event, float x, float y, int pointer, int button) {
+				// disable editing
+				if (!isAllowEditing()) {
+					return true;
+				}
+				
 				float rx = x / (TILE_SIZE * GameWorld.ROOM_SIZE);
 				float ry = y / (TILE_SIZE * GameWorld.ROOM_SIZE);
 
@@ -148,7 +153,12 @@ public class GameScreen extends BasicScreen {
 			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
 			 */
 			@Override
-			public void drag(InputEvent event, float x, float y, int pointer) {				
+			public void drag(InputEvent event, float x, float y, int pointer) {
+				// disable editing
+				if (!isAllowEditing()) {
+					return;
+				}
+				
 				int mx = (int) (x / (TILE_SIZE * GameWorld.ROOM_SIZE));
 				int my = (int) (y / (TILE_SIZE * GameWorld.ROOM_SIZE));
 
@@ -181,7 +191,12 @@ public class GameScreen extends BasicScreen {
 			 * @see com.badlogic.gdx.scenes.scene2d.InputListener#touchDown(com.badlogic.gdx.scenes.scene2d.InputEvent, float, float, int, int)
 			 */
 			@Override
-			public boolean mouseMoved(InputEvent event, float x, float y) {				
+			public boolean mouseMoved(InputEvent event, float x, float y) {		
+				// disable editing
+				if (!isAllowEditing()) {
+					return true;
+				}
+
 				int mx = (int) (x / (TILE_SIZE * GameWorld.ROOM_SIZE));
 				int my = (int) (y / (TILE_SIZE * GameWorld.ROOM_SIZE));
 
@@ -210,7 +225,52 @@ public class GameScreen extends BasicScreen {
 		});
 		roomRenderer.setZIndex(0);
 		stage.addActor(roomRenderer);
+	}
+
+	private void setupTiles() {
+		gameTiles = new GameTileset(texture, 32);
+
+		// SIMPLE
+		gameTiles.addSubset("blank", TileSubset.Type.SINGLE, 25);
+		// REGULAR
+//		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 26, 27);
 		
+		// RANDOM
+		// [@temporary dodgy way of ensuring not much of 11 or 13 show up]
+//		gameTiles.addSubset("blank", TileSubset.Type.RAND, 3,4,3,4,3,4,3,4,3,4,3,4,3,4,5);
+//		gameTiles.addSubset("blank", TileSubset.Type.RAND, 11, 12, 12, 12, 12, 12, 12,12, 12, 12, 12, 12, 12, 12, 12, 12, 13);
+		
+//		gameTiles.addSubset("blank", TileSubset.Type.MULTI, 27, 24);
+		gameTiles.addSubset("wall", TileSubset.Type.NINEPATCH, 16, 17, 18, 8, 9, 10, 0, 1, 2 );
+		gameTiles.addSubset("floor", TileSubset.Type.SINGLE, 24);
+	}
+
+	private void setupSounds() {
+		sounds = new SoundWrapper();
+		sounds.loadSound("gas", "sounds/gas.wav");
+		sounds.loadSound("trapdoor", "sounds/trapdoor.wav");
+		sounds.loadSound("laser", "sounds/laser.wav");
+		sounds.loadSound("alarm", "sounds/alarm.wav");
+		sounds.loadSound("explosion", "sounds/explosion.wav");
+	}
+
+	private void setupPreferences() {
+		preferences = Gdx.app.getPreferences("NoMisterBond-Preferences");
+		// always overwrite preferences with the defaults when in debug mode
+		setDefaultPreferences(LD25.DEBUG_MODE ? true : false);
+	}
+
+	private void setDefaultPreferences(boolean overwrite) {
+		// don't overwrite existing preferences unless specifically told to
+		if (preferences.get().size() > 0 && !overwrite) {
+			return;
+		}
+		
+		preferences.flush();
+		Console.debug("wrote default preferences");
+	}
+
+	private void setupUI() {
 		TextureRegion region = new TextureRegion(texture, 224, 160, 32, 32);
 		selectionBox = new SelectionBox(new NinePatch(region, 2, 2, 2, 2));
 //		selectionBox.setBounds(10, 10, TILE_SIZE * GameWorld.ROOM_SIZE, TILE_SIZE * GameWorld.ROOM_SIZE);
@@ -218,21 +278,6 @@ public class GameScreen extends BasicScreen {
 		selectionBox.setVisible(false);
 		roomRenderer.addActor(selectionBox);
 
-		setupUI();
-
-		
-//		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
-//		cam.translate(1000, 1000);
-		
-		if (Gdx.graphics.isGL20Available()) {
-			shaderProgram = createShader();
-			stage.getSpriteBatch().setShader(shaderProgram);
-//			tileRenderer.setShader(sp);
-		}
-		
-	}
-	
-	private void setupUI() {
 		Actor fpsCounter = new FpsCounter(this);
 		fpsCounter.setPosition(Gdx.graphics.getWidth() - 60, Gdx.graphics.getHeight() - 20);
 		uiStage.addActor(fpsCounter);	
@@ -252,7 +297,25 @@ public class GameScreen extends BasicScreen {
 		budget.setPosition(10, Gdx.graphics.getHeight() - 20);		
 		uiStage.addActor(budget);
 		
-		SimpleTextButton entityCount = new SimpleTextButton(this, "") {
+		SimpleTextButton lairHealth = new SimpleTextButton(this, "") {
+
+			/* (non-Javadoc)
+			 * @see com.badlogic.gdx.scenes.scene2d.Actor#act(float)
+			 */
+			@Override
+			public void act(float delta) {			
+				float normHealth = getWorld().getSecretLairHealth() / GameWorld.SECRET_LAIR_INITIAL_HEALTH;
+				setColor(1 - normHealth, normHealth, 0, 1);
+				setLabel(String.format("LAIR HEALTH: %.0f", getWorld().getSecretLairHealth()));
+				super.act(delta);
+			}
+			
+		};
+		lairHealth.setColor(1, 0, 0, 1);
+		lairHealth.setPosition(10, Gdx.graphics.getHeight() - 50);		
+		uiStage.addActor(lairHealth);		
+		
+		SimpleTextButton entityCount = new SimpleTextButton(this, "total entities: 99999") {
 			/* (non-Javadoc)
 			 * @see com.badlogic.gdx.scenes.scene2d.Actor#act(float)
 			 */
@@ -263,11 +326,12 @@ public class GameScreen extends BasicScreen {
 			}
 			
 		};
-		entityCount.setPosition(10, Gdx.graphics.getHeight() - 50);
+//		entityCount.setPosition(10, Gdx.graphics.getHeight() - 70);
+		entityCount.setPosition(Gdx.graphics.getWidth() - entityCount.getWidth() - 20, Gdx.graphics.getHeight() - 50);	
 		uiStage.addActor(entityCount);
 		
 		
-		TextureRegion region = new TextureRegion(texture, 192, 192, 64, 64);
+		region = new TextureRegion(texture, 192, 192, 64, 64);
 		NinePatch ninePatch = new NinePatch(region);
 		ninePatch.setTopHeight(8);
 		ninePatch.setBottomHeight(8);
@@ -319,6 +383,7 @@ public class GameScreen extends BasicScreen {
 			 */
 			@Override
 			public void clicked(InputEvent event, float x, float y) {
+				
 				if (((ToolButton)event.getTarget()).isEnabled()) {
 					event.cancel();
 					String toolName = ((ToolButton)event.getTarget()).toolName;
@@ -663,11 +728,12 @@ public class GameScreen extends BasicScreen {
 //		}
 //		Console.debug("  %s", cam.position);
 		
-		if (!isPaused()) {
+		if (!isPaused() && selfDestructRoom != null) {
 			getWorld().tick(delta);
 			stage.act(delta);
-			uiStage.act(delta);
+			
 		}
+		uiStage.act(delta);
 	}
 	
 	/* (non-Javadoc)
@@ -718,8 +784,11 @@ public class GameScreen extends BasicScreen {
 		case 'l':	// Lines / Debug
 				LD25.DEBUG_MODE = false;
 				return true;
-		case 'r':	// raid
+		case '=':	// raid
 				getWorld().getSpawner().setSpawnFrequency(getWorld().getSpawner().getSpawnFrequency() * .25f);
+				return true;
+		case '-':
+				getWorld().getSpawner().setSpawnFrequency(getWorld().getSpawner().getSpawnFrequency() * (1f / .2f));
 				return true;
 		case 'n':
 				// slows spawning a lot
@@ -840,6 +909,14 @@ public class GameScreen extends BasicScreen {
 	public static GameScreen instance() {
 		return instance;
 		
+	}
+
+	public boolean isAllowEditing() {
+		return allowEditing;
+	}
+
+	public void setAllowEditing(boolean allowEditing) {
+		this.allowEditing = allowEditing;
 	}
 }
 

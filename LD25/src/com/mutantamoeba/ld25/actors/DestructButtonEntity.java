@@ -13,7 +13,7 @@ public class DestructButtonEntity extends GameEntity {
 		});
 		setOrigin(16,0);		
 	}
-	float alarmFrequency = 1f;
+	float alarmFrequency = 3f;
 	float alarmCounter = 0;
 	@Override
 	protected boolean updateRoom(int x, int y) {

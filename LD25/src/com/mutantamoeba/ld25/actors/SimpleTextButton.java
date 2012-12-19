@@ -14,6 +14,7 @@ public class SimpleTextButton extends SimpleButton {
 	BasicScreen screen;
 	String label;
 	BitmapFont font;
+	boolean mouseChangesTextColor = true;
 	
 	public SimpleTextButton(BasicScreen gameScreen, String label) {
 		super();
@@ -35,10 +36,14 @@ public class SimpleTextButton extends SimpleButton {
 	@Override
 	public void draw(SpriteBatch batch, float parentAlpha) {
 		Color oldColor = font.getColor();
-		if (mouseOver) {
-			font.setColor(1, 0, 0, 1);
+		if (mouseChangesTextColor) {
+			if (mouseOver) {
+				font.setColor(1, 0, 0, 1);
+			} else {
+				font.setColor(getColor());
+			}
 		} else {
-			font.setColor(1, 1, 1, 1);
+			font.setColor(getColor());
 		}
 		font.draw(batch, label, getX(), getY() + getHeight());
 		font.setColor(oldColor);

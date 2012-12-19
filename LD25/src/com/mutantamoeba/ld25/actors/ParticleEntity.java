@@ -1,5 +1,6 @@
 package com.mutantamoeba.ld25.actors;
 
+import com.badlogic.gdx.graphics.Color;
 import com.mutantamoeba.ld25.Room;
 import com.mutantamoeba.ld25.screens.GameScreen;
 import com.mutantamoeba.ld25.utils.MathUtils;
@@ -32,11 +33,12 @@ public class ParticleEntity extends GameEntity {
 	public void act(float delta) {		
 		super.act(delta);
 		ageCounter += delta;
+		Color myColor = getColor();
 		if (ageCounter > maxAge / 2f) {
-			setColor(1f, 1f, 1f, MathUtils.map(ageCounter, maxAge/2f, maxAge, 1, 0));
-		} else {
-			setColor(1f, 1f, 1f, 1f);
-		}
+			setColor(myColor.r, myColor.g, myColor.b, MathUtils.map(ageCounter, maxAge/2f, maxAge, 1, 0));
+		} /*else {
+			setColor(myColor.r, myColor.g, myColor.b, myColor.a);
+		}*/
 		if (ageCounter > maxAge) {
 //			Console.debug("Destroying");
 			setRoom(originalRoom);
