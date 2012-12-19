@@ -341,7 +341,7 @@ public class GameScreen extends BasicScreen {
 		
 		roomInspector = new RoomInspector(ninePatch, getFont());
 		roomInspector.setSize(200, 150);
-		roomInspector.setPosition(Gdx.graphics.getWidth() - roomInspector.getWidth(), Gdx.graphics.getHeight() - roomInspector.getHeight() - fpsCounter.getHeight() - 5);
+		roomInspector.setPosition(Gdx.graphics.getWidth() - roomInspector.getWidth(), Gdx.graphics.getHeight() - roomInspector.getHeight() - (2*fpsCounter.getHeight()) - 5);
 
 		///////// [@note this is the first object in the list now]
 		uiStage.getActors().insert(0, roomInspector);
@@ -526,6 +526,10 @@ public class GameScreen extends BasicScreen {
 				Room r = getWorld().roomMap.get(mx, my);
 
 				if (canApply() && r != null) {
+					if ( !("basic".equals(r.config().template().getName())) ) {
+						// don't let people place their buttons in trapped rooms
+						return true;
+					}
 					if (selfDestructButton == null) {
 						selfDestructButton = new DestructButtonEntity();
 						stage.addActor(selfDestructButton);
@@ -534,12 +538,10 @@ public class GameScreen extends BasicScreen {
 							// don't let people waste money moving the button to the same place
 							return true;
 						}
-						if ( !("basic".equals(r.config().template().getName())) ) {
-							// don't let people place their buttons in trapped rooms
-							return true;
-						}
 						selfDestructRoom.removeEntity(selfDestructButton);
-					}
+					} 
+					
+					
 					selfDestructRoom = r;
 					selfDestructButton.setRoom(r);
 					selfDestructButton.setPosition((mx+0.5f)*(GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE), (my+0.5f)*(GameScreen.TILE_SIZE*GameWorld.ROOM_SIZE)); 

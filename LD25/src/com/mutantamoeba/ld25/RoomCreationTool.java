@@ -12,7 +12,11 @@ public class RoomCreationTool extends GameTool {
 		
 		RoomTemplate tpl = world.getRoomTemplate(name);
 		Room existingRoom = world.roomMap.get((int)mx, (int)my);
-		if (canApply() && (existingRoom == null || existingRoom.config().type.equals("basic")) ) {
+		if (canApply() && (existingRoom == null || existingRoom.config().type.equals("basic"))) {
+			if (existingRoom != null && existingRoom == gameScreen.selfDestructRoom) {
+				gameScreen.selectRoom((int)mx, (int)my);
+				return false;
+			}
 			world.roomMap.makeTemplatedRoom((int)mx, (int)my, tpl);
 			gameScreen.getTileRenderer().updateFromMap();
 			applyCost();
