@@ -21,7 +21,9 @@ public class GameWorld {
 	
 	public static final int ROOM_SIZE = 5;
 
-	public static final float SECRET_LAIR_INITIAL_HEALTH = 500;
+	public static final float SECRET_LAIR_INITIAL_HEALTH = 500f;
+
+	private static final float DEFAULT_SPAWN_FREQUENCY = 8f;
 	public int mapWidth, mapHeight;
 	public int tileMapWidth, tileMapHeight;
 
@@ -34,6 +36,8 @@ public class GameWorld {
 	private GameBondSpawner spawner;
 	private GameScoreKeeper scoreKeeper;
 	private float secretLairHealth = SECRET_LAIR_INITIAL_HEALTH;
+
+	private boolean gameOver;
 	
 	
 	public GameWorld(GameScreen gameScreen, int mapWidth, int mapHeight) {
@@ -49,15 +53,21 @@ public class GameWorld {
 		scoreKeeper = new GameScoreKeeper();
 		
 		economy = new GameEconomy();
-		setSpawner(new GameBondSpawner(this, 8));
+		setSpawner(new GameBondSpawner(this, DEFAULT_SPAWN_FREQUENCY));
 		createRoomTemplates();
 	}
 
 	public void tick(float delta) {
-		economy.tick(delta);
-		getSpawner().tick(delta);
+		if (!isGameOver()) {
+			economy.tick(delta);
+			getSpawner().tick(delta);
+		}
 	}
 	
+	private boolean isGameOver() {
+		return gameOver;
+	}
+
 	public RoomTemplate addRoomTemplate(String name, int maxLevel) {
 		RoomTemplate tpl = new RoomTemplate(name, maxLevel);
 		roomTemplates.put(name, tpl);
@@ -315,8 +325,13 @@ public class GameWorld {
 				TextBox textBox = new TextBox(GameScreen.instance(), getScoreKeeper().getScoreString());
 				GameScreen.instance().getUiStage().addActor(textBox);
 				textBox.setPosition( (Gdx.graphics.getWidth()-textBox.getWidth())/2, (Gdx.graphics.getHeight()-textBox.getHeight())/2);
+				setGameOver();
 			}
 		} 
+	}
+
+	private void setGameOver() {
+		gameOver = true;
 	}
 
 	/**

@@ -6,6 +6,8 @@ import com.mutantamoeba.ld25.Room;
 import com.mutantamoeba.ld25.screens.GameScreen;
 
 public class DestructButtonEntity extends GameEntity {
+	private static final float ALARM_VOLUME_ATTACKING = 0.8f;
+	private static final float ALARM_VOLUME_PROXIMITY = 0.5f;
 	public DestructButtonEntity() {
 		super(GameScreen.instance().texture, new int [] {
 			//52
@@ -13,7 +15,7 @@ public class DestructButtonEntity extends GameEntity {
 		});
 		setOrigin(16,0);		
 	}
-	float alarmFrequency = 3f;
+	float alarmFrequency = 2f;
 	float alarmCounter = 0;
 	@Override
 	protected boolean updateRoom(int x, int y) {
@@ -28,7 +30,7 @@ public class DestructButtonEntity extends GameEntity {
 			return;
 		}
 		if (room.hasBonds()) {
-			startAlarm();
+			startAlarm(ALARM_VOLUME_ATTACKING);
 			return;
 		}
 		Array<Room> others = room.getExits();
@@ -44,8 +46,11 @@ public class DestructButtonEntity extends GameEntity {
 		
 	}
 	private void startAlarm() {
+		startAlarm(ALARM_VOLUME_PROXIMITY);
+	}
+	private void startAlarm(float volume) {
 		if (alarmCounter <= 0) {
-			GameScreen.instance().sounds.trigger("alarm", 0.2f);
+			GameScreen.instance().sounds.trigger("alarm", volume);
 			alarmCounter = alarmFrequency;
 		}
 	}

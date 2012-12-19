@@ -13,10 +13,13 @@ public class MainMenuScreen extends BasicScreen {
 	Music music;
 	public MainMenuScreen(Game game) {
 		super(game);
+//		Gdx.audio.newSound(Gdx.files.local("sounds/intro_music.wav")).play(0.5f);
 		
-		music = Gdx.audio.newMusic(Gdx.files.local("sounds/intro_music.wav"));
+		music = Gdx.audio.newMusic(Gdx.files.internal("sounds/intro_music.mp3"));
 		music.setLooping(true);
+		music.setVolume(1f);
 		music.play();
+		Console.log("music obj is %s", music);
 		
 		SimpleTextButton butt = new SimpleTextButton(this, "> press anything to start <");
 		stage.addActor(butt);

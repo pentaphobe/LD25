@@ -18,6 +18,7 @@ public class LaserTurretEntity extends TrapEntity {
 	Vector2 mousePos = new Vector2();
 	boolean gotMouse=false;
 	float targetRotation = 0;
+	Counter soundCounter = new Counter(0.3f);
 	public LaserTurretEntity(LaserTurretEntity other) {
 		super(other);
 		setAlwaysDraw(true);
@@ -50,7 +51,10 @@ public class LaserTurretEntity extends TrapEntity {
 			
 			batch.draw(regions[0].getTexture(), getX() + GameScreen.HTILE_SIZE + xOffs, getY() + ySize/2f + yOffs, 0, ySize/2f, xSize, ySize, 1, 1, rotation, 64, 160, 32, 32, false, false);
 			drawSparks(batch, getX() + mousePos.x, getY() + mousePos.y);
-			GameScreen.instance().sounds.trigger("laser", 0.05f);
+			if (soundCounter.ready()) {
+				GameScreen.instance().sounds.trigger("laser", 0.05f);
+				soundCounter.reset();
+			}
 		}
 			
 		if (isActivated() && isReloaded()) {
@@ -100,6 +104,7 @@ public class LaserTurretEntity extends TrapEntity {
 		rotation += MathUtils.dirDelta(rotation, targetRotation, 180) * 0.25f;
 		super.act(delta);
 		
+		soundCounter.update(delta);
 		if (isActivated()) {
 			// check intersection with entities
 			float startX = getX();

@@ -12,8 +12,8 @@ import com.badlogic.gdx.graphics.g2d.NinePatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.Group;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
@@ -770,8 +770,7 @@ public class GameScreen extends BasicScreen {
 		
 		if (!isPaused() && selfDestructRoom != null) {
 			getWorld().tick(delta);
-			stage.act(delta);
-			
+			stage.act(delta);			
 		}
 		getUiStage().act(delta);
 	}
@@ -794,7 +793,11 @@ public class GameScreen extends BasicScreen {
 //		Console.debug("SCROLLED:%d", amount);
 		OrthographicCamera cam = (OrthographicCamera)stage.getCamera();
 		// [@todo make zoom center around the mouse]
+//		Vector3 mouseRelative = new Vector3(Gdx.input.getX() * GameScreen.TILE_SIZE, Gdx.input.getY() * GameScreen.TILE_SIZE, 0);
+//		cam.unproject(mouseRelative);
+//		cam.translate(-mouseRelative.x, -mouseRelative.y);
 		cam.zoom += amount / 10.0f;
+		
 		float minZoom = 0.25f;
 		float maxZoom = 10;
 		if (cam.zoom < minZoom) {
@@ -802,7 +805,8 @@ public class GameScreen extends BasicScreen {
 		} else if (cam.zoom > maxZoom) {
 			cam.zoom = maxZoom;
 		}
-		
+//		cam.project(mouseRelative);
+//		cam.translate(mouseRelative.x, mouseRelative.y);
 		return super.scrolled(amount);
 	}
 	
@@ -834,7 +838,7 @@ public class GameScreen extends BasicScreen {
 				// slows spawning a lot
 				getWorld().getSpawner().setSpawnFrequency(1000);
 				return true;
-		case 'x':
+		case 0x1b:	// Escape
 				dispose();
 
 				LD25.instance().setScreen(new MainMenuScreen(game));

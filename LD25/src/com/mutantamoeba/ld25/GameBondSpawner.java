@@ -12,21 +12,25 @@ public class GameBondSpawner {
 	private static final boolean SPAWN_SCALES_TO_ENTRY_ROOMS = true;
 
 	private static final int DEFAULT_WAVE_FREQUENCY = 8;
-	private static final int DEFAULT_WAVE_FREQUENCY_DECREMENT = 1;	
+	private static final float DEFAULT_WAVE_FREQUENCY_DECREMENT = 0.5f;	
 	private static final int DEFAULT_MINIMUM_WAVE_FREQUENCY = 2;
+	
+	private static final float DEFAULT_SPAWN_FREQUENCY_DECREMENT = DEFAULT_WAVE_FREQUENCY_DECREMENT * 0.5f;
 	
 	private static final int DEFAULT_WAVE_SIZE = 1;	// multiplied by number of rooms (if SPAWN_SCALES_TO_ENTRY_ROOMS is true)
 
 	private static final int DEFAULT_WAVE_SIZE_INCREMENT = 1;
 
 	private static final float DEFAULT_WAVE_TIME = 2f;
+
+	private static final float DEFAULT_SPAWN_FREQUENCY_MIN = 0;
 	
 	GameWorld world;
 	private float spawnFrequency;
 	float spawnCounter;
-	public int waveCounter = 0;
-	public int waveFrequency = DEFAULT_WAVE_FREQUENCY;	// after how many spawns do we have a wave?
-	int waveFrequencyDecrement = DEFAULT_WAVE_FREQUENCY_DECREMENT;
+	public float waveCounter = 0;
+	public float waveFrequency = DEFAULT_WAVE_FREQUENCY;	// after how many spawns do we have a wave?
+	float waveFrequencyDecrement = DEFAULT_WAVE_FREQUENCY_DECREMENT;
 	float waveTime = DEFAULT_WAVE_TIME; // how long the wave lasts
 	float waveTimeCounter = 0;
 	boolean inWave = false;
@@ -70,6 +74,9 @@ public class GameBondSpawner {
 			increaseWaveDifficulties();	
 			inWave = false;
 			waveTimeCounter = 0;
+			if (spawnFrequency > DEFAULT_SPAWN_FREQUENCY_MIN) { 
+				spawnFrequency -= DEFAULT_SPAWN_FREQUENCY_DECREMENT;
+			}
 			world.getScoreKeeper().addScore("waves survived", 1);
 		}				
 		// do a wave

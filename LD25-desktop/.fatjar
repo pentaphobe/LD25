@@ -1,0 +1,14 @@
+#Fat Jar Configuration File
+#Thu Dec 20 04:04:08 EST 2012
+onejar.license.required=true
+manifest.classpath=
+manifest.removesigners=true
+onejar.checkbox=false
+jarname=LD25-desktop_fat.jar
+manifest.mergeall=true
+manifest.mainclass=com.mutantamoeba.ld25.Main
+manifest.file=<createnew>
+jarname.isextern=false
+onejar.expand=
+excludes=<po|LD25-desktop>~sounds/~intro_music.wav
+includes=
