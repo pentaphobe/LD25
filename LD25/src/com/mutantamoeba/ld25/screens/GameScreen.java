@@ -9,10 +9,10 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.Texture.TextureFilter;
 import com.badlogic.gdx.graphics.Texture.TextureWrap;
 import com.badlogic.gdx.graphics.g2d.NinePatch;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
@@ -44,6 +44,7 @@ import com.mutantamoeba.ld25.engine.Console;
 import com.mutantamoeba.ld25.tilemap.GameTileset;
 import com.mutantamoeba.ld25.tilemap.TileRenderer;
 import com.mutantamoeba.ld25.tilemap.TileSubset;
+import com.mutantamoeba.ld25.utils.FboTarget;
 
 public class GameScreen extends BasicScreen {
 	static final int WORLD_WIDTH = 16;
@@ -71,6 +72,7 @@ public class GameScreen extends BasicScreen {
 	public DestructButtonEntity selfDestructButton;
 	SelectionBox selectionBox, toolSelectionBox, mouseHoverBox;
 	private TextBox toolTipBox;
+	public ShaderProgram originalShaderProgram;
 	public ShaderProgram shaderProgram;
 	
 	RoomInspector roomInspector;
@@ -80,11 +82,18 @@ public class GameScreen extends BasicScreen {
 	public SoundWrapper sounds;
 	private static GameScreen instance;
 	Preferences preferences;
+	
+	FboTarget fbo;
+	boolean useFbo = true;
 
 	public GameScreen(Game game) {
 		super(game);
 		
 		setupPreferences();
+		
+		if (useFbo) {
+			fbo = new FboTarget(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		}
 		
 		instance = this;
 //		setClearScreen(false);
@@ -117,7 +126,8 @@ public class GameScreen extends BasicScreen {
 		
 		if (Gdx.graphics.isGL20Available()) {
 			shaderProgram = createShader();
-			stage.getSpriteBatch().setShader(shaderProgram);
+			originalShaderProgram = SpriteBatch.createDefaultShader();
+			stage.getSpriteBatch().setShader(originalShaderProgram);
 //			tileRenderer.setShader(sp);
 		}
 		
@@ -542,7 +552,7 @@ public class GameScreen extends BasicScreen {
 			public boolean apply(int mx, int my) {
 				Room r = getWorld().roomMap.get(mx, my);
 
-				if (canApply() && r != null) {
+				if (canApply() && r != null && r != selfDestructRoom) {
 					deselectRoom();					
 					r.destroy();
 					getWorld().roomMap.remove(mx, my);
@@ -655,7 +665,9 @@ public class GameScreen extends BasicScreen {
 			+ "uniform sampler2D u_texture;\n" //
 			+ "void main()\n"//
 			+ "{\n" //			
-			+ "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords);\n" //
+			+ "  float dst = length(v_texCoords - vec2(.5, .5));"
+			+ "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords) * smoothstep(1., 0.2, dst);"
+//			+ "  gl_FragColor = v_color * texture2D(u_texture, v_texCoords);\n" //
 			+ "}";
 
 		ShaderProgram shader = new ShaderProgram(vertexShader, fragmentShader);
@@ -911,7 +923,7 @@ public class GameScreen extends BasicScreen {
 	 * @see com.mutantamoeba.ld25.screens.BasicScreen#render(float)
 	 */
 	@Override
-	public void render(float delta) {		
+	public void render(float delta) {
 		super.render(delta);
 //	    particleEffect.draw(stage.getSpriteBatch(), delta);
 	}
@@ -969,6 +981,35 @@ public class GameScreen extends BasicScreen {
 	public Stage getUiStage() {
 		// TODO Auto-generated method stub
 		return uiStage;
+	}
+
+	@Override
+	public void preUiRender(SpriteBatch batch) {
+		if (useFbo) {
+			if (Gdx.graphics.isGL20Available()) {
+				batch.setShader(shaderProgram);
+			}
+			fbo.render(batch);
+			if (Gdx.graphics.isGL20Available()) {
+				batch.setShader(originalShaderProgram);
+			}
+						
+		}
+		super.preUiRender(batch);
+	}
+
+	@Override
+	public void postGameRender(SpriteBatch spriteBatch) {
+		if (useFbo)
+			fbo.end();
+		super.postGameRender(spriteBatch);
+	}
+
+	@Override
+	public void preGameRender(SpriteBatch spriteBatch) {
+		if (useFbo)
+			fbo.begin();
+		super.preGameRender(spriteBatch);
 	}
 }
 

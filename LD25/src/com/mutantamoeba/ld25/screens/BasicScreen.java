@@ -5,6 +5,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.graphics.GL10;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.mutantamoeba.ld25.engine.Console;
 
@@ -53,10 +54,44 @@ public abstract class BasicScreen extends AbstractScreen {
 		
 		update(delta);
 		
+		preGameRender(stage.getSpriteBatch());
 		stage.draw();
-		getUiStage().draw();		
+		postGameRender(stage.getSpriteBatch());
+		preUiRender(uiStage.getSpriteBatch());
+		getUiStage().draw();
+		postUiRender(uiStage.getSpriteBatch());
 	}
 	
+	private void postUiRender(SpriteBatch spriteBatch) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void preUiRender(SpriteBatch batch) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void postGameRender(SpriteBatch spriteBatch) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void postUiRender() {
+		// TODO Auto-generated method stub
+		
+	}
+
+
+	public void preGameRender(SpriteBatch spriteBatch) {
+		// TODO Auto-generated method stub
+		
+	}
+
+
 	public void update(float delta) {
 		if (!isPaused()) {
 			stage.act(delta);
